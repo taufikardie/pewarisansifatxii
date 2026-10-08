@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Pembelajaran Pewarisan Sifat - Biologi Kelas XII</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bio: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        dna: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .dna-strand {
+            background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%);
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.95; transform: scale(1.01); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 4s infinite ease-in-out;
+        }
+        .punnett-cell {
+            transition: all 0.2s ease-in-out;
+        }
+        .punnett-cell:hover {
+            transform: scale(1.03);
+            z-index: 10;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Header App Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('beranda')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-bio-600 to-dna-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        🧬
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">GENETIKA XII</h1>
+                        <p class="text-xs text-bio-700 font-medium hidden sm:block">SMAN 2 Tanjung Raja • Taufik Ardiyanto, S.Pd.</p>
+                    </div>
+                </div>
+
+                <!-- Overall Progress Indicator -->
+                <div class="hidden md:flex items-center space-x-3 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                    <div class="text-xs font-semibold text-slate-600">Progres Belajar:</div>
+                    <div class="w-28 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="header-progress-bar" class="bg-bio-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <span id="header-progress-text" class="text-xs font-bold text-bio-700">0%</span>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex md:hidden">
+                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1 shadow-lg max-h-[80vh] overflow-y-auto">
+            <button onclick="navClick('beranda')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">🏠 Beranda</button>
+            <button onclick="navClick('materi')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">📚 Materi</button>
+            <button onclick="navClick('lab')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">🧬 Lab Persilangan</button>
+            <button onclick="navClick('latihan')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">✏️ Soal Latihan</button>
+            <button onclick="navClick('ujian')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">🎯 Simulasi Ujian</button>
+            <button onclick="navClick('hasil')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">📊 Hasil & Evaluasi</button>
+            <button onclick="navClick('dashboard')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">👨‍🏫 Dashboard Guru</button>
+            <button onclick="navClick('glosarium')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">💡 Glosarium</button>
+            <button onclick="navClick('tentang')" class="nav-mobile-btn w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-bio-50 hover:text-bio-700">ℹ️ Tentang Aplikasi</button>
+        </div>
+    </header>
+
+    <div class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-6">
+        
+        <!-- Desktop Navigation Sidebar -->
+        <aside class="hidden md:block w-64 flex-shrink-0">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm sticky top-22 space-y-1">
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Navigasi Utama</div>
+                
+                <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>🏠</span><span>Beranda</span>
+                </button>
+                <button onclick="switchTab('materi')" id="nav-materi" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>📚</span><span>Materi</span>
+                </button>
+                <button onclick="switchTab('lab')" id="nav-lab" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>🧬</span><span>Lab Persilangan</span>
+                </button>
+                <button onclick="switchTab('latihan')" id="nav-latihan" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>✏️</span><span>Soal Latihan</span>
+                </button>
+                <button onclick="switchTab('ujian')" id="nav-ujian" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>🎯</span><span>Simulasi Ujian</span>
+                </button>
+                
+                <div class="pt-4 px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Laporan & Ref</div>
+                <button onclick="switchTab('hasil')" id="nav-hasil" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>📊</span><span>Hasil & Evaluasi</span>
+                </button>
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>👨‍🏫</span><span>Dashboard Guru</span>
+                </button>
+                <button onclick="switchTab('glosarium')" id="nav-glosarium" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>💡</span><span>Glosarium</span>
+                </button>
+                <button onclick="switchTab('tentang')" id="nav-tentang" class="nav-tab-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-bio-50 hover:text-bio-700 transition">
+                    <span>ℹ️</span><span>Tentang Aplikasi</span>
+                </button>
+
+                <!-- Student Info Card -->
+                <div class="pt-4 border-t border-slate-100 mt-4">
+                    <div class="bg-bio-50/60 p-3 rounded-xl border border-bio-100 text-xs">
+                        <div class="text-slate-500 font-medium">Siswa Terdaftar:</div>
+                        <div id="sidebar-student-name" class="font-bold text-slate-800 truncate">Belum diisi</div>
+                        <div id="sidebar-student-class" class="text-bio-700 font-semibold truncate">-</div>
+                        <button onclick="promptStudentInfo()" class="mt-2 w-full py-1 bg-white hover:bg-bio-100 text-bio-700 font-bold border border-bio-200 rounded-lg text-xs transition">
+                            ✏️ Edit Profil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main View Container -->
+        <main class="flex-grow min-w-0">
+            
+            <!-- VIEW: BERANDA -->
+            <section id="view-beranda" class="tab-content space-y-6">
+                <!-- Hero Banner -->
+                <div class="relative overflow-hidden bg-gradient-to-r from-bio-800 via-bio-700 to-dna-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl animate-pulse-subtle">
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide uppercase mb-3">
+                            Biologi SMA Kelas XII • Semester 1
+                        </span>
+                        <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
+                            PEWARISAN SIFAT / HEREDITAS
+                        </h1>
+                        <p class="text-bio-100 text-sm sm:text-base leading-relaxed mb-6 font-light">
+                            “Memahami bagaimana sifat fisik, fisiologis, dan kelainan genetik diturunkan dari generasi ke generasi melalui prinsip Hukum Mendel dan penyimpangan semutnya.”
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="switchTab('materi')" class="px-5 py-3 bg-white text-bio-800 hover:bg-bio-50 font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm">
+                                📖 Pelajari Materi (10 Topik)
+                            </button>
+                            <button onclick="switchTab('lab')" class="px-5 py-3 bg-dna-600 hover:bg-dna-700 text-white font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm border border-white/20">
+                                🧬 Simulasi Persilangan Lab
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Decorative Graphic -->
+                    <div class="absolute -right-10 -bottom-10 opacity-15 text-9xl select-none pointer-events-none">
+                        🧬
+                    </div>
+                </div>
+
+                <!-- Identity Badge -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-bio-100 text-bio-800 flex items-center justify-center font-bold">
+                            👨‍🏫
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500">Penyusun & Guru Pengampu:</div>
+                            <div class="font-bold text-slate-800 text-sm sm:text-base">Taufik Ardiyanto, S.Pd.</div>
+                        </div>
+                    </div>
+                    <div class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg">
+                        🏫 SMAN 2 Tanjung Raja
+                    </div>
+                </div>
+
+                <!-- Learning Progress Tracker Card -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                            <span>📈</span> Stat Progres Belajar Anda
+                        </h2>
+                        <span id="beranda-progress-percent" class="text-xl font-extrabold text-bio-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div id="beranda-progress-bar" class="bg-gradient-to-r from-bio-500 to-dna-500 h-3 rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                        <div class="bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
+                            <div id="stat-materi-count" class="text-xl font-bold text-bio-700">0/10</div>
+                            <div class="text-xs text-slate-500">Materi Dibuka</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
+                            <div id="stat-latihan-score" class="text-xl font-bold text-dna-600">0</div>
+                            <div class="text-xs text-slate-500">Skor Latihan Terbaik</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
+                            <div id="stat-ujian-count" class="text-xl font-bold text-purple-600">0</div>
+                            <div class="text-xs text-slate-500">Ujian Selesai</div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
+                            <div id="stat-last-grade" class="text-xl font-bold text-amber-600">-</div>
+                            <div class="text-xs text-slate-500">Nilai Ujian Akhir</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Quick Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div onclick="switchTab('materi')" class="p-5 bg-white border border-slate-200 rounded-2xl hover:border-bio-500 hover:shadow-md transition cursor-pointer group">
+                        <div class="w-12 h-12 rounded-xl bg-bio-100 text-bio-700 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            📚
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-bio-700 transition">10 Topik Materi Lengkap</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Persilangan Golongan Darah ABO, Alel Ganda, Atavisme, Kriptomeri, Polimeri, Epistasis, Gen Komplementer, Tautan, Nondisjunction, & Dihibrid.</p>
+                    </div>
+
+                    <div onclick="switchTab('lab')" class="p-5 bg-white border border-slate-200 rounded-2xl hover:border-dna-500 hover:shadow-md transition cursor-pointer group">
+                        <div class="w-12 h-12 rounded-xl bg-dna-100 text-dna-700 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            🧬
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-dna-700 transition">Laboratorium Persilangan</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Kalkulator otomatis untuk melakukan simulasi persilangan genotipe monohibrid dan dihibrid pilihanmu secara visual.</p>
+                    </div>
+
+                    <div onclick="switchTab('latihan')" class="p-5 bg-white border border-slate-200 rounded-2xl hover:border-amber-500 hover:shadow-md transition cursor-pointer group">
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            ✏️
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-amber-700 transition">Bank Soal Latihan (50 Soal)</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Berlatih soal pilihan ganda A-E lengkap dengan umpan balik cepat dan pembahasan langkah demi langkah.</p>
+                    </div>
+
+                    <div onclick="switchTab('ujian')" class="p-5 bg-white border border-slate-200 rounded-2xl hover:border-purple-500 hover:shadow-md transition cursor-pointer group">
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition">
+                            🎯
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-purple-700 transition">Simulasi Ujian Realistis</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Ujian 40 soal acak, timer 60 menit, navigasi nomor, mode HOTS, serta analisis kelemahan otomatis setelah selesai.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MATERI -->
+            <section id="view-materi" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Modul Pembelajaran Pewarisan Sifat</h2>
+                        <p class="text-xs text-slate-500">Pilih topik materi di bawah untuk membaca dan menguji pemahamanmu secara interaktif.</p>
+                    </div>
+                    <!-- Topic Selector Dropdown -->
+                    <select id="materi-select" onchange="loadTopic(this.value)" class="px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-bio-500">
+                        <option value="1">Topik 1: Persilangan Golongan Darah ABO</option>
+                        <option value="2">Topik 2: Alel Ganda Rambut Kelinci</option>
+                        <option value="3">Topik 3: Atavisme (Jengger Ayam)</option>
+                        <option value="4">Topik 4: Kriptomeri (Linaria maroccana)</option>
+                        <option value="5">Topik 5: Polimeri (Warna Biji Gandum)</option>
+                        <option value="6">Topik 6: Epistasis & Hipostasis</option>
+                        <option value="7">Topik 7: Gen Komplementer</option>
+                        <option value="8">Topik 8: Tautan Gen & Crossing Over</option>
+                        <option value="9">Topik 9: Gagal Berpisah (Nondisjunction)</option>
+                        <option value="10">Topik 10: Persilangan Dihibrid Mendel II</option>
+                    </select>
+                </div>
+
+                <!-- Topic Content Display Body -->
+                <div id="materi-body" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <!-- Dynamic topic content will be injected here -->
+                </div>
+
+                <!-- Navigation Controls for Materials -->
+                <div class="flex justify-between items-center pt-2">
+                    <button id="prev-topic-btn" onclick="navTopic(-1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                        ← Topik Sebelumnya
+                    </button>
+                    <span id="topic-indicator" class="text-xs font-bold text-slate-500">Topik 1 dari 10</span>
+                    <button id="next-topic-btn" onclick="navTopic(1)" class="px-4 py-2 bg-bio-600 hover:bg-bio-700 text-white font-semibold rounded-xl text-sm transition">
+                        Topik Selanjutnya →
+                    </button>
+                </div>
+            </section>
+
+            <!-- VIEW: LAB PERSILANGAN -->
+            <section id="view-lab" class="tab-content space-y-6 hidden">
+                <div class="bg-gradient-to-r from-dna-800 to-bio-800 p-6 sm:p-8 rounded-3xl text-white shadow-lg">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">
+                        <span>🧬</span> Laboratorium Persilangan Virtual
+                    </h2>
+                    <p class="text-dna-100 text-sm font-light">
+                        Simulasikan persilangan genetik secara otomatis. Masukkan genotipe induk (parental) untuk menghasilkan gamet, tabel Punnett Square, genotipe, dan rasio fenotipe keturunan!
+                    </p>
+                </div>
+
+                <!-- Lab Input Controls -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Induk 1 Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-slate-700">Genotipe Induk 1 (P1):</label>
+                            <input type="text" id="lab-p1" value="AaBb" placeholder="Contoh: AaBb, RrPp, IAi, BbEe" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-lg font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-bio-500">
+                            <p class="text-xs text-slate-500">Format: 2 karakter (Monohibrid) atau 4 karakter (Dihibrid)</p>
+                        </div>
+
+                        <!-- Induk 2 Input -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-bold text-slate-700">Genotipe Induk 2 (P2):</label>
+                            <input type="text" id="lab-p2" value="AaBb" placeholder="Contoh: AaBb, RrPp, IBi, bbEe" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-lg font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-bio-500">
+                            <p class="text-xs text-slate-500">Format: Samakan pasangan gen dengan Induk 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Mode Preset Selector -->
+                    <div class="flex flex-wrap items-center gap-2 pt-2">
+                        <span class="text-xs font-bold text-slate-500">Contoh Kasus Cepat:</span>
+                        <button onclick="setLabPreset('AaBb', 'AaBb')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Dihibrid Standard (AaBb × AaBb)</button>
+                        <button onclick="setLabPreset('IAi', 'IBi')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Golongan Darah (A heterozigot × B heterozigot)</button>
+                        <button onclick="setLabPreset('RrPp', 'RrPp')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Atavisme (RrPp × RrPp)</button>
+                        <button onclick="setLabPreset('BbEe', 'BbEe')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Epistasis Labrador (BbEe × BbEe)</button>
+                    </div>
+
+                    <button onclick="processLabCross()" class="w-full py-3.5 bg-gradient-to-r from-bio-600 to-dna-600 hover:from-bio-700 hover:to-dna-700 text-white font-bold text-base rounded-xl shadow-md transition transform active:scale-98">
+                        🔬 LAKUKAN PERSILANGAN SEKARANG
+                    </button>
+                </div>
+
+                <!-- Lab Output Results Container -->
+                <div id="lab-result-container" class="space-y-6 hidden">
+                    <!-- Gametes Display -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2 flex items-center gap-2">
+                            <span>1️⃣</span> Penentuan Gamet Induk
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 bg-bio-50/70 border border-bio-100 rounded-xl">
+                                <div class="text-xs text-slate-500 font-semibold mb-1">Gamet Induk 1 (<span id="lab-out-p1-str"></span>):</div>
+                                <div id="lab-out-g1" class="flex flex-wrap gap-2 text-sm font-bold font-mono text-bio-800"></div>
+                            </div>
+                            <div class="p-4 bg-dna-50/70 border border-dna-100 rounded-xl">
+                                <div class="text-xs text-slate-500 font-semibold mb-1">Gamet Induk 2 (<span id="lab-out-p2-str"></span>):</div>
+                                <div id="lab-out-g2" class="flex flex-wrap gap-2 text-sm font-bold font-mono text-dna-800"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Punnett Square Table -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2 flex items-center gap-2">
+                            <span>2️⃣</span> Punnett Square Keturunan (F1 / F2)
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table id="lab-punnett-table" class="mx-auto border-collapse border border-slate-300">
+                                <!-- Punnett square generated here -->
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Summary Genotypes and Phenotypes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Genotype breakdown -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-2">
+                                📊 Persentase & Rasio Genotipe
+                            </h3>
+                            <div id="lab-genotype-list" class="space-y-2 text-sm font-mono"></div>
+                        </div>
+
+                        <!-- Phenotype breakdown -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-2">
+                                🎨 Estimasi Rasio Fenotipe
+                            </h3>
+                            <div id="lab-phenotype-list" class="space-y-2 text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: SOAL LATIHAN -->
+            <section id="view-latihan" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Bank Soal Latihan Per Topik</h2>
+                        <p class="text-xs text-slate-500">Pilih topik materi yang ingin diuji untuk melatih pemahamanmu secara mendalam.</p>
+                    </div>
+                    <select id="latihan-topic-select" onchange="filterLatihanTopic(this.value)" class="px-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-bio-500">
+                        <option value="all">Semua Topik (50 Soal)</option>
+                        <option value="1">Golongan Darah ABO</option>
+                        <option value="2">Alel Ganda Kelinci</option>
+                        <option value="3">Atavisme</option>
+                        <option value="4">Kriptomeri</option>
+                        <option value="5">Polimeri</option>
+                        <option value="6">Epistasis & Hipostasis</option>
+                        <option value="7">Gen Komplementer</option>
+                        <option value="8">Tautan Gen</option>
+                        <option value="9">Gagal Berpisah</option>
+                        <option value="10">Dihibrid Mendel</option>
+                    </select>
+                </div>
+
+                <!-- Active Question Container -->
+                <div id="latihan-question-card" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <!-- Insert question body dynamically -->
+                </div>
+
+                <!-- Navigation Controls for Practice -->
+                <div class="flex justify-between items-center">
+                    <button onclick="navLatihan(-1)" id="btn-prev-latihan" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                        ← Soal Sebelumnya
+                    </button>
+                    <span id="latihan-counter" class="text-xs font-bold text-slate-500">Soal 1 / 50</span>
+                    <button onclick="navLatihan(1)" id="btn-next-latihan" class="px-4 py-2 bg-bio-600 hover:bg-bio-700 text-white font-semibold rounded-xl text-sm transition">
+                        Soal Selanjutnya →
+                    </button>
+                </div>
+            </section>
+
+            <!-- VIEW: SIMULASI UJIAN -->
+            <section id="view-ujian" class="tab-content space-y-6 hidden">
+                
+                <!-- Ujian Start Screen -->
+                <div id="ujian-start-screen" class="bg-white p-6 sm:p-10 rounded-2xl border border-slate-200 shadow-sm text-center space-y-6">
+                    <div class="w-16 h-16 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-3xl mx-auto">
+                        🎯
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-800">Simulasi Ujian Pewarisan Sifat</h2>
+                        <p class="text-sm text-slate-500 max-w-xl mx-auto mt-1">
+                            Ujian ini terdiri dari 40 soal acak dari bank soal pilihan ganda. Waktu pengerjaan disimulasikan selama 60 menit.
+                        </p>
+                    </div>
+
+                    <div class="max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-200 text-left space-y-3">
+                        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Identitas Peserta Ujian</div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap Siswa:</label>
+                            <input type="text" id="exam-input-name" placeholder="Masukkan nama kamu..." class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Kelas / Jurusan:</label>
+                            <input type="text" id="exam-input-class" placeholder="Contoh: XII MIPA 1" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="pt-2 flex items-center gap-2">
+                            <input type="checkbox" id="exam-hots-mode" class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
+                            <label for="exam-hots-mode" class="text-xs font-bold text-purple-800 cursor-pointer">
+                                🚀 Aktifkan Mode HOTS (Prioritaskan Soal Penalaran Tingkat Tinggi)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="startExam()" class="px-8 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-base rounded-xl shadow-lg transition transform hover:scale-102">
+                            🚀 MULAI SIMULASI UJIAN (60 MENIT)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Ujian Interface -->
+                <div id="ujian-active-screen" class="space-y-6 hidden">
+                    <!-- Exam Header Bar -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-20 z-30">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">⏱️</span>
+                            <div>
+                                <div class="text-xs text-slate-500">Sisa Waktu:</div>
+                                <div id="exam-timer" class="text-lg font-mono font-bold text-purple-700">60:00</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <button onclick="showExamGridModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-1">
+                                <span>📱</span> Navigasi Soal (<span id="exam-answered-count">0</span>/40)
+                            </button>
+                            <button onclick="confirmFinishExam()" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow transition">
+                                🏁 Selesai Ujian
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Question Container -->
+                    <div id="exam-question-body" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                        <!-- Exam Question content injected here -->
+                    </div>
+
+                    <!-- Exam Footer Navigation -->
+                    <div class="flex justify-between items-center">
+                        <button onclick="navExam(-1)" id="btn-prev-exam" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                            ← Sebelumnya
+                        </button>
+                        <span id="exam-current-indicator" class="text-xs font-bold text-slate-500">Soal 1 dari 40</span>
+                        <button onclick="navExam(1)" id="btn-next-exam" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-sm transition">
+                            Selanjutnya →
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: HASIL & EVALUASI -->
+            <section id="view-hasil" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-slate-800">Laporan Hasil & Evaluation Report</h2>
+                            <p class="text-xs text-slate-500">Hasil evaluasi pembelajaran genetika dari simulasi ujian terkini.</p>
+                        </div>
+                        <div class="text-xs text-slate-500 font-semibold" id="hasil-date-str"></div>
+                    </div>
+
+                    <!-- Student Score Summary Card -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-gradient-to-br from-slate-900 to-bio-950 p-6 rounded-2xl text-white shadow-xl">
+                        <div class="text-center md:text-left space-y-1">
+                            <div class="text-xs text-bio-400 font-semibold uppercase">Identitas Peserta</div>
+                            <div id="hasil-student-name" class="text-xl font-bold">Nama Siswa</div>
+                            <div id="hasil-student-class" class="text-sm text-slate-300">Kelas / SMAN 2 Tanjung Raja</div>
+                        </div>
+
+                        <div class="text-center bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+                            <div class="text-xs text-slate-300">NILAI AKHIR SIMULASI</div>
+                            <div id="hasil-final-score" class="text-5xl font-extrabold text-bio-400 tracking-tight my-1">0</div>
+                            <div id="hasil-category-badge" class="inline-block px-3 py-0.5 rounded-full text-xs font-bold uppercase bg-bio-500 text-white">
+                                PERLU BELAJAR
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="bg-white/10 p-2.5 rounded-lg border border-white/5">
+                                <div id="hasil-correct-count" class="text-lg font-bold text-bio-400">0</div>
+                                <div class="text-slate-400">Benar</div>
+                            </div>
+                            <div class="bg-white/10 p-2.5 rounded-lg border border-white/5">
+                                <div id="hasil-wrong-count" class="text-lg font-bold text-red-400">0</div>
+                                <div class="text-slate-400">Salah</div>
+                            </div>
+                            <div class="bg-white/10 p-2.5 rounded-lg border border-white/5">
+                                <div id="hasil-empty-count" class="text-lg font-bold text-amber-400">0</div>
+                                <div class="text-slate-400">Kosong</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic-by-Topic Diagnostic Error Analysis -->
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <span>🔍</span> Analisis Kesalahan & Rekomendasi Per Topik
+                        </h3>
+                        <div id="hasil-topic-analysis" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Injected topic error breakdown -->
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3 pt-4 border-t border-slate-100">
+                        <button onclick="switchTab('ujian')" class="px-5 py-2.5 bg-bio-600 hover:bg-bio-700 text-white text-sm font-bold rounded-xl shadow transition">
+                            🔄 Coba Ujian Lagi
+                        </button>
+                        <button onclick="switchTab('materi')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition">
+                            📖 Pelajari Ulang Materi
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: DASHBOARD GURU -->
+            <section id="view-dashboard" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Dashboard Guru Biologi</h2>
+                            <p class="text-xs text-slate-500">Statistik aktivitas dan riwayat hasil simulasi siswa pada perangkat ini.</p>
+                        </div>
+                        <button onclick="exportResultsCSV()" class="px-4 py-2 bg-bio-700 hover:bg-bio-800 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2">
+                            <span>📥</span> Export Hasil ke CSV
+                        </button>
+                    </div>
+
+                    <!-- Teacher Overview Stats -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs text-slate-500 font-medium">Total Sesi Ujian</div>
+                            <div id="dash-total-exams" class="text-2xl font-extrabold text-slate-800 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs text-slate-500 font-medium">Rata-Rata Nilai</div>
+                            <div id="dash-avg-score" class="text-2xl font-extrabold text-bio-600 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs text-slate-500 font-medium">Nilai Tertinggi</div>
+                            <div id="dash-max-score" class="text-2xl font-extrabold text-dna-600 mt-1">0</div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="text-xs text-slate-500 font-medium">Nilai Terendah</div>
+                            <div id="dash-min-score" class="text-2xl font-extrabold text-amber-600 mt-1">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Exam History Table -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm">Riwayat Pengerjaan Simulasi</h3>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left text-sm text-slate-700">
+                                <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                                    <tr>
+                                        <th class="px-4 py-3 border-b">Tanggal</th>
+                                        <th class="px-4 py-3 border-b">Nama Siswa</th>
+                                        <th class="px-4 py-3 border-b">Kelas</th>
+                                        <th class="px-4 py-3 border-b text-center">Benar/Salah</th>
+                                        <th class="px-4 py-3 border-b text-center">Nilai</th>
+                                        <th class="px-4 py-3 border-b text-center">Kategori</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-history-table-body">
+                                    <!-- Injected history rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reset Application Storage Button -->
+                    <div class="pt-4 border-t border-slate-100 flex justify-end">
+                        <button onclick="confirmResetData()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-semibold text-xs rounded-xl border border-red-200 transition">
+                            ⚠️ Reset Semua Data LocalStorage
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: GLOSARIUM -->
+            <section id="view-glosarium" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Glosarium Istilah Genetika</h2>
+                        <p class="text-xs text-slate-500">Cari dan pelajari definisi istilah-istilah kunci dalam modul pewarisan sifat.</p>
+                    </div>
+                    
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" id="glossary-search" oninput="filterGlossary()" placeholder="Cari istilah... (contoh: Alel, Kriptomeri, Epistasis)" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-bio-500">
+                        <span class="absolute left-3.5 top-3.5 text-slate-400">🔍</span>
+                    </div>
+
+                    <!-- Terms Cards Container -->
+                    <div id="glossary-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <!-- Injected glossary terms -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TENTANG APLIKASI -->
+            <section id="view-tentang" class="tab-content space-y-6 hidden">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="text-center space-y-2 border-b border-slate-100 pb-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-bio-600 to-dna-600 text-white flex items-center justify-center text-3xl mx-auto shadow-md">
+                            🧬
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-800">SIMULASI PEMBELAJARAN PEWARISAN SIFAT</h2>
+                        <p class="text-xs font-bold text-bio-700 tracking-wide uppercase">Biologi Kelas XII SMA</p>
+                        <p class="text-sm text-slate-500 font-light max-w-lg mx-auto">
+                            Media pembelajaran digital interaktif dan laboratorium virtual genetika berbasis web tanpa server (dapat berjalan secara offline).
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-5 bg-bio-50/50 rounded-xl border border-bio-100 space-y-3">
+                            <h3 class="font-bold text-bio-900 text-base flex items-center gap-2">
+                                👨‍🏫 Identitas Penyusun
+                            </h3>
+                            <div class="text-sm space-y-1 text-slate-700">
+                                <div><strong class="text-slate-900">Nama Guru:</strong> Taufik Ardiyanto, S.Pd.</div>
+                                <div><strong class="text-slate-900">Mata Pelajaran:</strong> Biologi</div>
+                                <div><strong class="text-slate-900">Sekolah:</strong> SMAN 2 Tanjung Raja</div>
+                                <div><strong class="text-slate-900">Tahun Pengembangan:</strong> 2026</div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 bg-dna-50/50 rounded-xl border border-dna-100 space-y-3">
+                            <h3 class="font-bold text-dna-900 text-base flex items-center gap-2">
+                                💡 Fitur Unggulan
+                            </h3>
+                            <ul class="text-xs space-y-2 text-slate-700 list-disc list-inside">
+                                <li>10 Modul Interaktif Penyimpangan Semut Mendel & Tautan</li>
+                                <li>Laboratorium Persilangan Genetik Otomatis</li>
+                                <li>Bank Soal Latihan Pembahasan Lengkap</li>
+                                <li>Simulasi Ujian Timer 60 Menit & Acak Soal</li>
+                                <li>Analisis Diagnosis Kesalahan Belajar Siswa</li>
+                                <li>Dapat Berjalan 100% Offline Tanpa Koneksi Internet</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Navigation Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-bold text-slate-700">Aplikasi Pembelajaran Biologi – Pewarisan Sifat</p>
+            <p class="mt-1">Taufik Ardiyanto, S.Pd. • SMAN 2 Tanjung Raja • © 2026 All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <!-- Modal Grid Navigasi Ujian -->
+    <div id="exam-grid-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 text-base">Navigasi Nomor Soal Ujian</h3>
+                <button onclick="hideExamGridModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            </div>
+            <div id="exam-grid-buttons" class="grid grid-cols-8 gap-2 max-h-60 overflow-y-auto p-1">
+                <!-- Buttons injected dynamically -->
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-purple-600 rounded"></span> Sudah Dijawab</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-slate-200 rounded"></span> Belum Dijawab</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        // Application State
+        let appState = {
+            studentName: 'Siswa SMA',
+            studentClass: 'XII MIPA',
+            materiProgress: {},
+            latihanScores: 0,
+            examHistory: [],
+            currentTopicId: 1,
+            currentLatihanIdx: 0,
+            currentLatihanTopicFilter: 'all',
+            // Exam State
+            examQuestions: [],
+            examUserAnswers: {},
+            examCurrentIdx: 0,
+            examTimerInterval: null,
+            examTimeRemaining: 3600
+        };
+
+        // 10 Interactive Materials Data
+        const MATERI_DATA = {
+            1: {
+                title: "Persilangan Golongan Darah System ABO",
+                badge: "Topik 1",
+                summary: "Golongan darah sistem ABO ditentukan oleh alel ganda IA, IB, dan i.",
+                content: `
+                    <div class="space-y-4">
+                        <div class="p-4 bg-bio-50 rounded-xl border border-bio-200">
+                            <h4 class="font-bold text-bio-900 text-sm">Konsep Dasar Genotipe Golongan Darah ABO:</h4>
+                            <ul class="text-xs space-y-1.5 text-slate-700 mt-2 list-disc list-inside">
+                                <li><strong>Alel I<sup>A</sup>:</strong> Membentuk antigen A pada eritrosit. Dominan terhadap i.</li>
+                                <li><strong>Alel I<sup>B</sup>:</strong> Membentuk antigen B pada eritrosit. Dominan terhadap i.</li>
+                                <li><strong>Alel i:</strong> Tidak membentuk antigen. Resesif terhadap I<sup>A</sup> dan I<sup>B</sup>.</li>
+                                <li><strong>I<sup>A</sup> dan I<sup>B</sup> bersifat KODOMINAN:</strong> Jika hadir bersama (I<sup>A</sup>I<sup>B</sup>), keduanya diekspresikan sehingga fenotipenya Golongan Darah AB.</li>
+                            </ul>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left border border-slate-200 rounded-lg">
+                                <thead class="bg-slate-100 font-bold text-slate-700">
+                                    <tr>
+                                        <th class="p-2 border-b">Fenotipe Darah</th>
+                                        <th class="p-2 border-b">Genotipe Homozigot</th>
+                                        <th class="p-2 border-b">Genotipe Heterozigot</th>
+                                        <th class="p-2 border-b">Antigen (Aglutinogen)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="p-2 font-bold text-red-600">A</td><td class="p-2">I<sup>A</sup>I<sup>A</sup></td><td class="p-2">I<sup>A</sup>i</td><td class="p-2">Antigen A</td></tr>
+                                    <tr class="border-b"><td class="p-2 font-bold text-blue-600">B</td><td class="p-2">I<sup>B</sup>I<sup>B</sup></td><td class="p-2">I<sup>B</sup>i</td><td class="p-2">Antigen B</td></tr>
+                                    <tr class="border-b"><td class="p-2 font-bold text-purple-600">AB</td><td class="p-2">-</td><td class="p-2">I<sup>A</sup>I<sup>B</sup></td><td class="p-2">Antigen A & B</td></tr>
+                                    <tr><td class="p-2 font-bold text-slate-600">O</td><td class="p-2">ii</td><td class="p-2">-</td><td class="p-2">Tidak ada antigen</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800 text-xs mb-2">Contoh Persilangan: Ayah Golongan Darah A (I<sup>A</sup>i) × Ibu Golongan Darah B (I<sup>B</sup>i)</h5>
+                            <p class="text-xs text-slate-600 mb-2">Gamet Ayah: I<sup>A</sup>, i | Gamet Ibu: I<sup>B</sup>, i</p>
+                            <div class="grid grid-cols-2 gap-2 text-xs text-center font-mono font-bold max-w-xs mx-auto">
+                                <div class="bg-purple-100 p-2 rounded border border-purple-200">I<sup>A</sup>I<sup>B</sup> (AB) - 25%</div>
+                                <div class="bg-red-100 p-2 rounded border border-red-200">I<sup>A</sup>i (A) - 25%</div>
+                                <div class="bg-blue-100 p-2 rounded border border-blue-200">I<sup>B</sup>i (B) - 25%</div>
+                                <div class="bg-slate-200 p-2 rounded border border-slate-300">ii (O) - 25%</div>
+                            </div>
+                            <p class="text-xs font-semibold text-bio-700 mt-2 text-center">Kesimpulan Fenotipe Keturunan: 1 AB : 1 A : 1 B : 1 O (25% masing-masing)</p>
+                        </div>
+                    </div>
+                `
+            },
+            2: {
+                title: "Interaksi Alel Ganda Pada Warna Rambut Kelinci",
+                badge: "Topik 2",
+                summary: "Seri alel ganda mengontrol gradasi warna rambut kelinci dari kelabu hingga albino.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700 leading-relaxed">
+                            Alel ganda terjadi apabila satu gen memiliki lebih dari dua variasi alel pada lokus yang sama. Pada kelinci (Oryctolagus cuniculus), warna rambut dikontrol oleh 4 seri alel dengan hirarki dominansi:
+                        </p>
+
+                        <div class="p-3 bg-bio-100 rounded-xl text-center text-sm font-extrabold text-bio-900 font-mono">
+                            C > c<sup>ch</sup> > c<sup>h</sup> > c
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="p-3 bg-slate-50 border rounded-xl">
+                                <strong class="text-slate-900 block font-bold mb-1">1. Normal / Agouti (C)</strong>
+                                <div>Genotipe: CC, Cc<sup>ch</sup>, Cc<sup>h</sup>, Cc</div>
+                                <div class="text-slate-500">Fenotipe: Rambut kelabu bercak abu-abu penuh.</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 border rounded-xl">
+                                <strong class="text-slate-900 block font-bold mb-1">2. Chinchilla (c<sup>ch</sup>)</strong>
+                                <div>Genotipe: c<sup>ch</sup>c<sup>ch</sup>, c<sup>ch</sup>c<sup>h</sup>, c<sup>ch</sup>c</div>
+                                <div class="text-slate-500">Fenotipe: Rambut keperakan/abu-abu muda.</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 border rounded-xl">
+                                <strong class="text-slate-900 block font-bold mb-1">3. Himalaya (c<sup>h</sup>)</strong>
+                                <div>Genotipe: c<sup>h</sup>c<sup>h</sup>, c<sup>h</sup>c</div>
+                                <div class="text-slate-500">Fenotipe: Tubuh putih dengan ujung telinga/hidung/kaki hitam.</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 border rounded-xl">
+                                <strong class="text-slate-900 block font-bold mb-1">4. Albino (c)</strong>
+                                <div>Genotipe: cc</div>
+                                <div class="text-slate-500">Fenotipe: Putih polos seluruh tubuh, mata merah.</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            3: {
+                title: "Atavisme (Interaksi Gen Jengger Ayam)",
+                badge: "Topik 3",
+                summary: "Kemunculan sifat baru akibat interaksi dua pasang gen saling memengaruhi.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Atavisme adalah penyimpangan semut Mendel di mana interaksi antara dua gen dominan (R dan P) menghasilkan bentuk jengger (comb) ayam yang baru (Walnut), sedangkan interaksi resesif ganda menghasilkan jengger Single.
+                        </p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs font-bold">
+                            <div class="p-2.5 bg-amber-100 text-amber-900 rounded-xl">R_P_ : Walnut</div>
+                            <div class="p-2.5 bg-red-100 text-red-900 rounded-xl">R_pp : Rose</div>
+                            <div class="p-2.5 bg-blue-100 text-blue-900 rounded-xl">rrP_ : Pea</div>
+                            <div class="p-2.5 bg-slate-100 text-slate-800 rounded-xl">rrpp : Single</div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-slate-800 text-xs mb-1">Persilangan Dihibrid Heterozigot: RrPp × RrPp</h5>
+                            <p class="text-xs text-slate-600">Rasio Fenotipe F2 yang dihasilkan:</p>
+                            <div class="text-sm font-extrabold text-bio-700 mt-1">
+                                9 Walnut : 3 Rose : 3 Pea : 1 Single
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            4: {
+                title: "Kriptomeri (Linaria maroccana)",
+                badge: "Topik 4",
+                summary: "Gen dominan tersembunyi jika tidak didampingi oleh gen pengaktif pembentuk pigmen.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Kriptomeri adalah peristiwa gen dominan seolah-olah tersembunyi apabila berdiri sendiri dan baru mengekspresikan sifat apabila bertemu gen dominan lainnya. Contoh: Bunga <em>Linaria maroccana</em>.
+                        </p>
+
+                        <ul class="text-xs space-y-1.5 text-slate-700 bg-slate-50 p-3 rounded-xl border list-disc list-inside">
+                            <li><strong>Gen A:</strong> Membentuk pigmen Antosianin (A_ = ada pigmen, aa = tidak ada pigmen/putih).</li>
+                            <li><strong>Gen B:</strong> Mengondisikan plasma sel bersifat basa (B_ = basa, bb = asam).</li>
+                        </ul>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                            <div class="p-3 bg-purple-100 text-purple-900 rounded-xl">A_B_ : Ungu (Antosianin + Basa)</div>
+                            <div class="p-3 bg-red-100 text-red-900 rounded-xl">A_bb : Merah (Antosianin + Asam)</div>
+                            <div class="p-3 bg-slate-100 text-slate-700 rounded-xl">aaB_ & aabb : Putih</div>
+                        </div>
+
+                        <div class="p-3 bg-bio-50 border border-bio-200 rounded-xl text-center text-xs font-bold text-bio-800">
+                            Rasio Fenotipe F2 (AaBb × AaBb) = 9 Ungu : 3 Merah : 4 Putih
+                        </div>
+                    </div>
+                `
+            },
+            5: {
+                title: "Polimeri (Warna Biji Gandum)",
+                badge: "Topik 5",
+                summary: "Satu sifat dipengaruhi oleh banyak gen kuantitatif bersumbu kumulatif.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Polimeri adalah bentuk interaksi gen kumulatif (banyak gen memengaruhi satu sifat yang sama). Semakin banyak jumlah alel dominan, semakin pekat/kuat intensitas fenotipe yang diekspresikan. Contoh: Warna merah biji gandum.
+                        </p>
+
+                        <div class="p-4 bg-slate-50 rounded-xl border space-y-2 text-xs">
+                            <div class="flex justify-between font-bold"><span>M1M1 M2M2 (4 Dominan)</span> <span class="text-red-900">Merah Tua Sekali</span></div>
+                            <div class="flex justify-between font-bold"><span>M1m1 M2M2 / M1M1 M2m2 (3 Dominan)</span> <span class="text-red-700">Merah Tua</span></div>
+                            <div class="flex justify-between font-bold"><span>M1m1 M2m2 (2 Dominan)</span> <span class="text-red-600">Merah Sedang</span></div>
+                            <div class="flex justify-between font-bold"><span>M1m1 m2m2 / m1m1 M2m2 (1 Dominan)</span> <span class="text-red-400">Merah Muda</span></div>
+                            <div class="flex justify-between font-bold"><span>m1m1 m2m2 (0 Dominan)</span> <span class="text-slate-500">Putih</span></div>
+                        </div>
+
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center text-xs font-bold text-amber-900">
+                            Rasio Fenotipe Persilangan AaBb × AaBb = 15 Merah : 1 Putih
+                        </div>
+                    </div>
+                `
+            },
+            6: {
+                title: "Epistasis dan Hipostasis",
+                badge: "Topik 6",
+                summary: "Gen tertentu menutupi/menghalangi ekspresi gen dominan lain yang bukan alelnya.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            <strong>Epistasis:</strong> Gen yang menutupi ekspresi gen lain.<br>
+                            <strong>Hipostasis:</strong> Gen yang ditutupi ekspresinya.
+                        </p>
+
+                        <div class="p-4 bg-slate-50 border rounded-xl space-y-2 text-xs">
+                            <h5 class="font-bold text-slate-800">Contoh: Warna Bulu Anjing Labrador (Epistasis Resesif e)</h5>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>B_E_:</strong> Bulu Hitam</li>
+                                <li><strong>bbE_:</strong> Bulu Cokelat</li>
+                                <li><strong>__ee:</strong> Bulu Kuning (gen e homozigot menutupi gen B/b)</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl text-center text-xs font-bold text-purple-900">
+                            Rasio Fenotipe F2 (BbEe × BbEe) = 9 Hitam : 3 Cokelat : 4 Kuning
+                        </div>
+                    </div>
+                `
+            },
+            7: {
+                title: "Gen Komplementer (Lathyrus odoratus)",
+                badge: "Topik 7",
+                summary: "Dua gen dominan harus saling melengkapi untuk memunculkan fenotipe normal.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Gen komplementer adalah interaksi dua gen dominan yang saling melengkapi. Jika salah satu gen dominan tidak hadir, maka fenotipe yang diharapkan tidak muncul. Contoh: Warna bunga kacang <em>Lathyrus odoratus</em>.
+                        </p>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs text-center font-bold">
+                            <div class="p-3 bg-purple-100 text-purple-900 rounded-xl">C_P_ : Bunga Berwarna Ungu</div>
+                            <div class="p-3 bg-slate-100 text-slate-700 rounded-xl">C_pp, ccP_, ccpp : Bunga Putih</div>
+                        </div>
+
+                        <div class="p-3 bg-bio-50 border border-bio-200 rounded-xl text-center text-xs font-bold text-bio-800">
+                            Rasio Fenotipe F2 (CcPp × CcPp) = 9 Ungu : 7 Putih
+                        </div>
+                    </div>
+                `
+            },
+            8: {
+                title: "Tautan Gen & Pindah Silang (Crossing Over)",
+                badge: "Topik 8",
+                summary: "Gen-gen pada kromosom sama diwariskan bersama kecuali terjadi crossing over.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            <strong>Tautan Gen (Gene Linkage):</strong> Dua atau lebih gen terletak pada kromosom homolog yang sama sehingga cenderung diwariskan bersama-sama ke dalam gamet.
+                        </p>
+
+                        <div class="p-4 bg-slate-50 border rounded-xl space-y-2 text-xs">
+                            <h5 class="font-bold text-slate-800">Pindah Silang (Crossing Over) & Frekuensi Rekombinasi:</h5>
+                            <p class="text-slate-600">Crossing over terjadi pada profase I meiosis. Menghasilkan kombinasi keturunan tipe Parental dan tipe Rekombinan (RK).</p>
+                            <div class="p-3 bg-white font-mono border rounded text-center text-bio-800 font-bold">
+                                FR (%) = (Jumlah Keturunan Rekombinan / Total Seluruh Keturunan) × 100%
+                            </div>
+                            <p class="text-slate-500">Contoh: Jika RK = 20 ekor, Total = 100 ekor, maka FR = 20% (Jarak gen = 20 centiMorgan / cM).</p>
+                        </div>
+                    </div>
+                `
+            },
+            9: {
+                title: "Gagal Berpisah (Nondisjunction) & Aneuploidi",
+                badge: "Topik 9",
+                summary: "Kegagalan kromosom berpisah saat meiosis menyebabkan ketersediaan kromosom abnormal.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Nondisjunction terjadi ketika pasangan kromosom homolog (Meiosis I) atau kromatid saudara (Meiosis II) gagal berpisah secara normal, menghasilkan sel gamet aneuploid (n+1 atau n-1).
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="p-3 bg-red-50 border border-red-200 rounded-xl">
+                                <strong class="text-red-900 font-bold block mb-1">Sindrom Down (Trisomi 21)</strong>
+                                <div class="text-slate-600">47 kromosom (45A + XX / XY), kelebihan 1 kromosom nomor 21.</div>
+                            </div>
+                            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl">
+                                <strong class="text-purple-900 font-bold block mb-1">Sindrom Klinefelter</strong>
+                                <div class="text-slate-600">47 kromosom (44A + XXY), laki-laki bertubuh tinggi, testis kecil.</div>
+                            </div>
+                            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                                <strong class="text-blue-900 font-bold block mb-1">Sindrom Turner</strong>
+                                <div class="text-slate-600">45 kromosom (44A + XO), wanita steril bertubuh pendek.</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            10: {
+                title: "Persilangan Dihibrid & Hukum Mendel II",
+                badge: "Topik 10",
+                summary: "Hukum Asortasi Bebas: Gen-gen dari pasangan alel berbeda mengelompok secara bebas.",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-700">
+                            Persilangan dihibrid adalah persilangan antara dua individu dengan dua sifat beda (contoh: Biji Bulat Kuning BBKK × Biji Keriput Hijau bbkk).
+                        </p>
+
+                        <div class="p-4 bg-slate-50 border rounded-xl space-y-2 text-xs">
+                            <h5 class="font-bold text-slate-800">Gamet dari BbKk: BK, Bk, bK, bk</h5>
+                            <div class="p-3 bg-white font-mono border rounded text-center font-bold text-bio-800">
+                                Rasio Fenotipe F2 (BbKk × BbKk) = 9 : 3 : 3 : 1
+                            </div>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>9 Bulat Kuning (B_K_)</li>
+                                <li>3 Bulat Hijau (B_kk)</li>
+                                <li>3 Keriput Kuning (bbK_)</li>
+                                <li>1 Keriput Hijau (bbkk)</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        const QUESTION_BANK = [
+            // TOPIC 1: Golongan Darah ABO (5 Soal)
+            {
+                id: 1, topicId: 1, hots: false,
+                q: "Seorang ibu bergolongan darah A heterozigot (I<sup>A</sup>i) menikah dengan pria bergolongan darah B heterozigot (I<sup>B</sup>i). Berapa persentase kemungkinan anak mereka bergolongan darah O?",
+                a: "0%", b: "25%", c: "50%", d: "75%", e: "100%",
+                key: "b",
+                exp: "Persilangan I<sup>A</sup>i × I<sup>B</sup>i menghasilkan keturunan: I<sup>A</sup>I<sup>B</sup> (AB 25%), I<sup>A</sup>i (A 25%), I<sup>B</sup>i (B 25%), dan ii (O 25%). Kemungkinan O adalah 25%."
+            },
+            {
+                id: 2, topicId: 1, hots: true,
+                q: "Seorang bayi bergolongan darah O tertukar di rumah sakit. Manakah di antara pasangan suami istri berikut yang TIDAK MUNGKIN sebagai orang tua kandung bayi tersebut?",
+                a: "Ayah O dan Ibu A", b: "Ayah A dan Ibu B", c: "Ayah AB dan Ibu O", d: "Ayah B dan Ibu B", e: "Ayah A dan Ibu A",
+                key: "c",
+                exp: "Orang tua bergolongan darah AB (I<sup>A</sup>I<sup>B</sup>) selalu memberikan alel I<sup>A</sup> atau I<sup>B</sup> kepada anaknya. Maka tidak mungkin menghasilkan anak bergolongan darah O (ii)."
+            },
+            {
+                id: 3, topicId: 1, hots: false,
+                q: "Interaksi antara alel I<sup>A</sup> dan I<sup>B</sup> pada golongan darah sistem ABO mengekspresikan fenotipe AB secara bersamaan. Hubungan antar alel ini dinamakan...",
+                a: "Dominan penuh", b: "Resesif ganda", c: "Kodominan", d: "Intermediet", e: "Epistasis",
+                key: "c",
+                exp: "Kodominan terjadi ketika dua alel dominan berbeda diekspresikan secara serentak tanpa saling menutupi."
+            },
+            {
+                id: 4, topicId: 1, hots: false,
+                q: "Anak bergolongan darah AB dan O lahir dari pasangan suami istri dengan genotipe...",
+                a: "I<sup>A</sup>I<sup>A</sup> dan I<sup>B</sup>I<sup>B</sup>", b: "I<sup>A</sup>i dan I<sup>B</sup>i", c: "I<sup>A</sup>I<sup>B</sup> dan ii", d: "I<sup>A</sup>I<sup>A</sup> dan ii", e: "I<sup>B</sup>I<sup>B</sup> dan I<sup>A</sup>i",
+                key: "b",
+                exp: "Hanya persilangan heterozigot A (I<sup>A</sup>i) dan heterozigot B (I<sup>B</sup>i) yang dapat menghasilkan anak AB (I<sup>A</sup>I<sup>B</sup>) sekaligus O (ii)."
+            },
+            {
+                id: 5, topicId: 1, hots: true,
+                q: "Jika seorang wanita bergolongan darah A homozigot menikah dengan pria bergolongan darah B homozigot, maka seluruh anak-anaknya akan memiliki golongan darah...",
+                a: "50% A dan 50% B", b: "100% O", c: "100% AB", d: "25% AB dan 75% O", e: "50% AB dan 50% O",
+                key: "c",
+                exp: "Persilangan I<sup>A</sup>I<sup>A</sup> × I<sup>B</sup>I<sup>B</sup>menghasilkan 100% anak bergenotipe I<sup>A</sup>I<sup>B</sup> (Golongan Darah AB)."
+            },
+
+            // TOPIC 2: Alel Ganda Kelinci (5 Soal)
+            {
+                id: 6, topicId: 2, hots: false,
+                q: "Urutan dominansi seri alel ganda pada warna rambut kelinci adalah C > c<sup>ch</sup> > c<sup>h</sup> > c. Kelinci bergenotipe c<sup>ch</sup>c<sup>h</sup> memiliki fenotipe...",
+                a: "Kelabu Normal", b: "Chinchilla", c: "Himalaya", d: "Albino", e: "Hitam",
+                key: "b",
+                exp: "Alel c<sup>ch</sup> (Chinchilla) dominan terhadap c<sup>h</sup> (Himalaya), sehingga kelinci berfenotipe Chinchilla."
+            },
+            {
+                id: 7, topicId: 2, hots: true,
+                q: "Persilangan antara kelinci Chinchilla (c<sup>ch</sup>c) dengan kelinci Himalaya (c<sup>h</sup>c) akan menghasilkan rasio fenotipe keturunan...",
+                a: "1 Chinchilla : 1 Himalaya", b: "2 Chinchilla : 1 Himalaya : 1 Albino", c: "1 Normal : 1 Albino", d: "3 Chinchilla : 1 Albino", e: "1 Chinchilla : 2 Himalaya : 1 Albino",
+                key: "b",
+                exp: "Gamet: (c<sup>ch</sup>, c) × (c<sup>h</sup>, c). Keturunan: c<sup>ch</sup>c<sup>h</sup> (Chinchilla), c<sup>ch</sup>c (Chinchilla), c<sup>h</sup>c (Himalaya), cc (Albino). Rasio: 2 Chinchilla : 1 Himalaya : 1 Albino."
+            },
+            {
+                id: 8, topicId: 2, hots: false,
+                q: "Kelinci albino polos seluruh tubuhnya dan bermata merah memilik genotipe...",
+                a: "CC", b: "c<sup>ch</sup>c<sup>ch</sup>", c: "c<sup>h</sup>c<sup>h</sup>", d: "cc", e: "Cc<sup>h</sup>",
+                key: "d",
+                exp: "Fenotipe Albino merupakan sifat resesif ganda yang dipicu oleh genotipe homozigot resesif 'cc'."
+            },
+            {
+                id: 9, topicId: 2, hots: false,
+                q: "Manakah persilangan berikut yang TIDAK MUNGKIN menghasilkan anak kelinci Albino (cc)?",
+                a: "Cc × cc", b: "c<sup>ch</sup>c × c<sup>h</sup>c", c: "c<sup>h</sup>c × cc", d: "CC × cc", e: "Cc × c<sup>ch</sup>c",
+                key: "d",
+                exp: "Persilangan CC × cc hanya menghasilkan keturunan Cc (Normal/Agouti 100%), tidak mungkin menghasilkan cc."
+            },
+            {
+                id: 10, topicId: 2, hots: true,
+                q: "Berapa banyak kemungkinan kombinasi genotipe yang dapat dibentuk dari 4 alel ganda warna rambut kelinci?",
+                a: "4", b: "6", c: "10", d: "16", e: "8",
+                key: "c",
+                exp: "Rumus variasi genotipe alel ganda: [n(n+1)] / 2. Untuk n=4 alel: [4 × 5] / 2 = 10 jenis genotipe."
+            },
+
+            // TOPIC 3: Atavisme (5 Soal)
+            {
+                id: 11, topicId: 3, hots: false,
+                q: "Interaksi antara gen R dan P pada jengger ayam menghasilkan bentuk jengger Walnut dengan genotipe...",
+                a: "R_pp", b: "rrP_", c: "R_P_", d: "rrpp", e: "RRpp",
+                key: "c",
+                exp: "Jengger Walnut terbentuk apabila gen dominan R dan P hadir bersama-sama (R_P_)."
+            },
+            {
+                id: 12, topicId: 3, hots: false,
+                q: "Ayam bermolek jengger Rose (Rrpp) disilangkan dengan ayam jengger Pea (rrPp). Persentase keturunan berjengger Walnut adalah...",
+                a: "25%", b: "50%", c: "75%", d: "100%", e: "0%",
+                key: "a",
+                exp: "Gamet: (Rp, rp) × (rP, rp). Keturunan: RrPp (Walnut 25%), Rrpp (Rose 25%), rrPp (Pea 25%), rrpp (Single 25%)."
+            },
+            {
+                id: 13, topicId: 3, hots: true,
+                q: "Rasio fenotipe F2 pada persilangan Atavisme (RrPp × RrPp) adalah 9 Walnut : 3 Rose : 3 Pea : 1 Single. Angka 1 mewakili fenotipe...",
+                a: "Walnut", b: "Rose", c: "Pea", d: "Single", e: "Bilah ganda",
+                key: "d",
+                exp: "Rasio 1 mewakili individu genotipe resesif ganda (rrpp) yaitu jengger Single."
+            },
+            {
+                id: 14, topicId: 3, hots: false,
+                q: "Sifat jengger ayam dinamakan penyimpangan Atavisme karena...",
+                a: "Munculnya sifat baru yang merupakan rekapitulasi nenek moyang", b: "Menghilangkan gen resesif secara total", c: "Menghasilkan 100% kelainan resesif", d: "Memiliki alel ganda pada sel gamet", e: "Hanya diturunkan pada ayam betina",
+                key: "a",
+                exp: "Atavisme adalah munculnya kembali sifat nenek moyang akibat interaksi gen-gen berbeda."
+            },
+            {
+                id: 15, topicId: 3, hots: true,
+                q: "Ayam Walnut (RrPP) disilangkan dengan ayam Rose (Rrpp). Keturunan yang berjengger Pea adalah...",
+                a: "0%", b: "25%", c: "50%", d: "75%", e: "100%",
+                key: "a",
+                exp: "Keturunan Pea membutuhkan genotipe rrP_. Persilangan ini: Gamet (RP, rP) × (Rp, rp) → RRPp, RrPp, RrPp, rrPp? Tunggu: rP × rp = rrPp (Pea)! Eh: Gamet P1 (RP, rP) & P2 (Rp, rp). RrPP -> RP, rP. Rrpp -> Rp, rp. RrPP x Rrpp -> RRPp (Walnut), RrPp (Walnut), RrPp (Walnut), rrPp (Pea)! Jadi rrPp = 25%."
+            },
+
+            // TOPIC 4: Kriptomeri (5 Soal)
+            {
+                id: 16, topicId: 4, hots: false,
+                q: "Bunga Linaria maroccana merah (AAbb) disilangkan dengan bunga putih (aaBB). Seluruh F1 berbunga ungu (AaBb). Jika F1 disilangkan sesamanya, rasio F2 Ungu : Merah : Putih adalah...",
+                a: "9 : 3 : 3 : 1", b: "9 : 3 : 4", c: "12 : 3 : 1", d: "9 : 7", e: "15 : 1",
+                key: "b",
+                exp: "Rasio fenotipe F2 Kriptomeri adalah 9 Ungu (A_B_) : 3 Merah (A_bb) : 4 Putih (aaB_ dan aabb)."
+            },
+            {
+                id: 17, topicId: 4, hots: true,
+                q: "Pada Kriptomeri, bunga berbunga Putih disebabkan oleh...",
+                a: "Hadirnya gen A tanpa B", b: "Tidak adanya gen A pembentuk antosianin (aa)", c: "Kehadiran dua gen dominan A dan B", d: "Plasma sel bersifat basa", e: "Mutasi kromosom nomer 4",
+                key: "b",
+                exp: "Gen A bertanggung jawab membentuk pigmen antosianin. Jika genotipenya 'aa', maka pigmen tidak terbentuk sehingga bunga berwarna putih terlepas dari sifat plasma selnya."
+            },
+            {
+                id: 18, topicId: 4, hots: false,
+                q: "Persilangan Linaria maroccana AaBb (Ungu) dengan Aabb (Merah) menghasilkan keturunan berbunga putih sebesar...",
+                a: "12.5%", b: "25%", c: "37.5%", d: "50%", e: "75%",
+                key: "b",
+                exp: "Genotipe putih adalah aa__. Gamet AaBb (AB, Ab, aB, ab) × Aabb (Ab, ab). Hasil 'aa__': aaBb (1/8) + aabb (1/8) = 2/8 = 25%."
+            },
+            {
+                id: 19, topicId: 4, hots: false,
+                q: "Manakah genotipe Linaria maroccana di bawah ini yang memproduksi bunga berwarna Merah?",
+                a: "AABB", b: "AaBb", c: "AAbb", d: "aaBB", e: "aabb",
+                key: "c",
+                exp: "Bunga Merah dihasilkan oleh antosianin dalam suasana asam (A_bb)."
+            },
+            {
+                id: 20, topicId: 4, hots: true,
+                q: "Persilangan bunga Linaria maroccana merah (Aabb) dengan bunga putih (aaBb) menghasilkan keturunan ungu sebanyak...",
+                a: "25%", b: "50%", c: "75%", d: "0%", e: "100%",
+                key: "a",
+                exp: "Bunga ungu bergenotipe A_B_. Gamet Aabb (Ab, ab) × aaBb (aB, ab). Keturunan A_B_ adalah AaBb (1/4 = 25%)."
+            },
+
+            // TOPIC 5: Polimeri (5 Soal)
+            {
+                id: 21, topicId: 5, hots: false,
+                q: "Persilangan gandum biji merah (M1m1 M2m2) dengan gandum biji putih (m1m1 m2m2) menghasilkan keturunan berbiji putih sebesar...",
+                a: "25%", b: "50%", c: "75%", d: "100%", e: "12.5%",
+                key: "a",
+                exp: "Biji putih hanya diperoleh jika individu tidak memiliki alel dominan sama sekali (m1m1 m2m2). Peluang m1m1 m2m2 dari M1m1M2m2 × m1m1m2m2 adalah 1/4 (25%)."
+            },
+            {
+                id: 22, topicId: 5, hots: false,
+                q: "Pada peristiwa Polimeri, rasio fenotipe F2 persilangan dihibrid heterozigot adalah...",
+                a: "9 : 3 : 3 : 1", b: "15 Merah : 1 Putih", c: "9 Ungu : 7 Putih", d: "12 Hitam : 3 Kuning : 1 Putih", e: "13 Putih : 3 Berwarna",
+                key: "b",
+                exp: "Polimeri menghasilkan rasio fenotipe F2 15 Dominan : 1 Resesif."
+            },
+            {
+                id: 23, topicId: 5, hots: true,
+                q: "Manakah genotipe gandum yang memiliki intensitas warna merah paling pekat?",
+                a: "M1m1 M2m2", b: "M1M1 M2m2", c: "M1M1 M2M2", d: "m1m1 M2M2", e: "m1m1 m2m2",
+                key: "c",
+                exp: "Semakin banyak jumlah alel dominan M, warna merah semakin pekat. M1M1 M2M2 mengandung 4 alel dominan."
+            },
+            {
+                id: 24, topicId: 5, hots: false,
+                q: "Sifat polimeri mirip dengan pewarisan sifat kuantitatif pada manusia, seperti...",
+                a: "Golongan darah ABO", b: "Tinggi badan dan warna kulit", c: "Hemofilia", d: "Buta warna", e: "Bentuk jengger",
+                key: "b",
+                exp: "Sifat poligenik/kuantitatif seperti warna kulit dan tinggi badan dipengaruhi akumulasi alel dominan."
+            },
+            {
+                id: 25, topicId: 5, hots: true,
+                q: "Persilangan M1M1 m2m2 × m1m1 M2M2 menghasilkan F1 M1m1 M2m2. Persentase keturunan F2 yang memiliki 2 alel dominan adalah...",
+                a: "6/16 (37.5%)", b: "4/16 (25%)", c: "1/16 (6.25%)", d: "8/16 (50%)", e: "15/16 (93.75%)",
+                key: "a",
+                exp: "Genotipe dengan 2 alel dominan pada F2 (AaBb x AaBb): AAbb (1), aaBB (1), AaBb (4) -> Total 6/16 = 37.5%."
+            },
+
+            // TOPIC 6: Epistasis Hipostasis (5 Soal)
+            {
+                id: 26, topicId: 6, hots: false,
+                q: "Pada bulu anjing Labrador, gen B (Hitam) dominan terhadap b (Cokelat). Namun gen e homozigot (ee) bersifat epistasis menutupi B dan b sehingga bulu berwarna Kuning. Persilangan BbEe × BbEe menghasilkan rasio fenotipe...",
+                a: "9 Hitam : 3 Cokelat : 4 Kuning", b: "12 Hitam : 3 Cokelat : 1 Kuning", c: "9 Hitam : 7 Cokelat", d: "15 Hitam : 1 Kuning", e: "9 Hitam : 6 Cokelat : 1 Kuning",
+                key: "a",
+                exp: "Ini contoh Epistasis Resesif (ee) dengan rasio F2 = 9 Hitam (B_E_) : 3 Cokelat (bbE_) : 4 Kuning (__ee)."
+            },
+            {
+                id: 27, topicId: 6, hots: true,
+                q: "Persilangan labu gandum Epistasis Dominan (K_ menutupi H/h) HHKK (Hitam) × hhkk (Kuning) menghasilkan F1 HhKk (Hitam). Rasio F2 yang berwarna Kuning (hhkk) adalah...",
+                a: "1/16", b: "3/16", c: "4/16", d: "9/16", e: "12/16",
+                key: "a",
+                exp: "Warna kuning hanya terjadi pada individu resesif homozigot hhkk dengan frekuensi 1/16."
+            },
+            {
+                id: 28, topicId: 6, hots: false,
+                q: "Istilah bagi gen yang ditutupi/dihalangi ekspresinya oleh gen lain yang bukan alelnya adalah...",
+                a: "Epistatik", b: "Hipostatik", c: "Kodominan", d: "Kriptomerik", e: "Polimerik",
+                key: "b",
+                exp: "Gen yang ditutupi sebutannya Hipostatik, sedangkan gen penutup dinamakan Epistatik."
+            },
+            {
+                id: 29, topicId: 6, hots: false,
+                q: "Genotipe anjing Labrador yang berbulu Cokelat adalah...",
+                a: "BBEE", b: "BbEe", c: "bbEE", d: "BBee", e: "bbee",
+                key: "c",
+                exp: "Anjing berbulu cokelat membutuhkan genotipe bb (cokelat) dan minimal satu alel E (memungkinkan sintesis pigmen) = bbE_."
+            },
+            {
+                id: 30, topicId: 6, hots: true,
+                q: "Anjing Labrador hitam (BbEe) disilangkan dengan anjing kuning (Bbee). Persentase keturunan berbulu Kuning adalah...",
+                a: "25%", b: "50%", c: "75%", d: "12.5%", e: "37.5%",
+                key: "b",
+                exp: "Gamet BbEe (BE, Be, bE, be) × Bbee (Be, be). Keturunan kuning (__ee): BBEe(no), BBee(ya), BbEe(no), Bbee(ya), BbEe(no), Bbee(ya), bbEe(no), bbee(ya). Total 4/8 = 50%."
+            },
+
+            // TOPIC 7: Gen Komplementer (5 Soal)
+            {
+                id: 31, topicId: 7, hots: false,
+                q: "Pada bunga Lathyrus odoratus, warna ungu muncul jika terdapat gen C dan P bersamaan. Persilangan CcPp × CcPp menghasilkan rasio Ungu : Putih sebesar...",
+                a: "9 : 7", b: "15 : 1", c: "9 : 3 : 4", d: "13 : 3", e: "12 : 4",
+                key: "a",
+                exp: "Rasio Gen Komplementer F2 adalah 9 Ungu (C_P_) : 7 Putih (C_pp, ccP_, ccpp)."
+            },
+            {
+                id: 32, topicId: 7, hots: true,
+                q: "Dua tanaman Lathyrus odoratus berbunga putih disilangkan dan menghasilkan 100% F1 berbunga ungu. Genotipe kedua induk tersebut adalah...",
+                a: "CCpp dan ccPP", b: "Ccpp dan ccPp", c: "ccpp dan ccpp", d: "CCpp dan CCpp", e: "ccPP dan ccPP",
+                key: "a",
+                exp: "CCpp (Putih) × ccPP (Putih) menghasilkan 100% CcPp (Ungu)."
+            },
+            {
+                id: 33, topicId: 7, hots: false,
+                q: "Persilangan antara Lathyrus odoratus CcPp (Ungu) dengan ccpp (Putih) menghasilkan keturunan berbunga ungu sebesar...",
+                a: "25%", b: "50%", c: "75%", d: "100%", e: "0%",
+                key: "a",
+                exp: "Gamet CcPp (CP, Cp, cP, cp) × ccpp (cp). Keturunan C_P_ hanya CcPp (1/4 = 25%)."
+            },
+            {
+                id: 34, topicId: 7, hots: false,
+                q: "Manakah genotipe Lathyrus odoratus yang menghasilkan bunga berwarna putih?",
+                a: "CCPP", b: "CcPP", c: "CCPp", d: "ccPP", e: "CcPp",
+                key: "d",
+                exp: "ccPP kekurangan gen dominan C, sehingga tidak dapat membentuk substansi dasar pembentuk pigmen."
+            },
+            {
+                id: 35, topicId: 7, hots: true,
+                q: "Jika gen C memproduksi prekursor pigmen dan gen P memproduksi enzim pengaktif, maka keturunan bergenotipe C_pp akan fenotipenya...",
+                a: "Ungu", b: "Merah", c: "Putih", d: "Kuning", e: "Cokelat",
+                key: "c",
+                exp: "Tanpa enzim pengaktif (pp), prekursor pigmen tidak dapat diubah menjadi pigmen ungu, sehingga bunga tetap Putih."
+            },
+
+            // TOPIC 8: Tautan Gen (5 Soal)
+            {
+                id: 36, topicId: 8, hots: false,
+                q: "Hasil uji silang (test cross) lalat buah heterozigot menghasilkan keturunan: Tipe Parental = 800, Tipe Rekombinan = 200. Berapakah nilai Frekuensi Rekombinasi (FR)?",
+                a: "10%", b: "20%", c: "40%", d: "80%", e: "50%",
+                key: "b",
+                exp: "FR = (Jumlah Rekombinan / Total Seluruh Keturunan) × 100% = (200 / 1000) × 100% = 20%."
+            },
+            {
+                id: 37, topicId: 8, hots: true,
+                q: "Dua gen A dan B mengalami tautan sempurna tanpa crossing over. Gamet yang dibentuk oleh individu bergenotipe AaBb (fase terangkai kapel AB/ab) adalah...",
+                a: "AB, Ab, aB, ab", b: "AB dan ab saja", c: "Ab dan aB saja", d: "Aa dan Bb", e: "AB saja",
+                key: "b",
+                exp: "Tautan sempurna tanpa pindah silang hanya memisah alel kapel bawaan parental: AB dan ab."
+            },
+            {
+                id: 38, topicId: 8, hots: false,
+                q: "Peristiwa pertukaran segmen kromatid bukan saudara dari pasangan kromosom homolog pada profase I meiosis disebut...",
+                a: "Nondisjunction", b: "Crossing Over (Pindah Silang)", c: "Epistasis", d: "Translasi", e: "Duplikasi",
+                key: "b",
+                exp: "Pindah silang / Crossing Over menghasilkan kombinasi baru (rekombinan) pada gamet."
+            },
+            {
+                id: 39, topicId: 8, hots: false,
+                q: "Jarak antara gen P dan Q pada kromosom jika frekuensi rekombinasinya 15% adalah...",
+                a: "1.5 cm", b: "15 centiMorgan (cM)", c: "150 cM", d: "0.15 mm", e: "15 meter",
+                key: "b",
+                exp: "1% frekuensi rekombinasi setara dengan 1 map unit / 1 centiMorgan (cM). 15% = 15 cM."
+            },
+            {
+                id: 40, topicId: 8, hots: true,
+                q: "Jika persilangan lalat buah menghasilkan 90% keturunan tipe parental dan 10% tipe rekombinan, maka jarak antar gen yang tertaut adalah...",
+                a: "90 cM", b: "10 cM", c: "100 cM", d: "45 cM", e: "5 cM",
+                key: "b",
+                exp: "Jarak gen dihitung dari persentase tipe rekombinan (10% = 10 cM)."
+            },
+
+            // TOPIC 9: Gagal Berpisah (5 Soal)
+            {
+                id: 41, topicId: 9, hots: false,
+                q: "Seorang anak memiliki kariotipe 47, XX, +21 (kelebihan 1 kromosom nomor 21). Anak tersebut menderita sindrom...",
+                a: "Turner", b: "Klinefelter", c: "Down", d: "Patau", e: "Edward",
+                key: "c",
+                exp: "Sindrom Down disebabkan trisomi kromosom autosom nomor 21."
+            },
+            {
+                id: 42, topicId: 9, hots: false,
+                q: "Penderita Sindrom Klinefelter memiliki jumlah kromosom dan rumus kromosom...",
+                a: "45, XO", b: "47, XXY", c: "47, XYY", d: "46, XX", e: "48, XXXY",
+                key: "b",
+                exp: "Sindrom Klinefelter terjadi akibat trisomi kromosom seks laki-laki (47, XXY)."
+            },
+            {
+                id: 43, topicId: 9, hots: true,
+                q: "Gagal berpisah (nondisjunction) dapat terjadi pada tahap pembelahan meiosis, yaitu pada saat...",
+                a: "Profase I dan Anafase I/II", b: "Interfase", c: "Telofase II saja", d: "Sitokinesis", e: "Sintesis DNA",
+                key: "a",
+                exp: "Gagal berpisah terjadi pada anafase I (kromosom homolog gagal berpisah) atau anafase II (kromatid saudara gagal berpisah)."
+            },
+            {
+                id: 44, topicId: 9, hots: false,
+                q: "Individu wanita dengan kariotipe 45, XO menderita sindrom...",
+                a: "Down", b: "Turner", c: "Klinefelter", d: "Jacobs", e: "Cri du chat",
+                key: "b",
+                exp: "Sindrom Turner terjadi akibat monosomi kromosom seks wanita (45, XO)."
+            },
+            {
+                id: 45, topicId: 9, hots: true,
+                q: "Gamet yang terbentuk jika sel induk meiotik mengalami gagal berpisah penuh pada seluruh kromosom adalah gamet...",
+                a: "Haploid (n)", b: "Diploid (2n)", c: "Nullisomi (n-1)", d: "Aneuploid", e: "Tetraploid",
+                key: "b",
+                exp: "Jika seluruh kromosom gagal berpisah, gamet yang dihasilkan tetap berkromosom diploid (2n)."
+            },
+
+            // TOPIC 10: Dihibrid Mendel (5 Soal)
+            {
+                id: 46, topicId: 10, hots: false,
+                q: "Tanaman kacang kapri biji bulat kuning (BbKk) disilangkan dengan kapri keriput hijau (bbkk). Rasio fenotipe keturunannya adalah...",
+                a: "9 : 3 : 3 : 1", b: "1 : 1 : 1 : 1", c: "3 : 1", d: "1 : 2 : 1", e: "9 : 7",
+                key: "b",
+                exp: "Test cross dihibrid (BbKk × bbkk) selalu menghasilkan rasio fenotipe 1 : 1 : 1 : 1."
+            },
+            {
+                id: 47, topicId: 10, hots: false,
+                q: "Jumlah variasi gamet yang dibentuk oleh individu bergenotipe AaBbCcDD adalah...",
+                a: "4", b: "8", c: "16", d: "32", e: "2",
+                key: "b",
+                exp: "Rumus jumlah gamet: 2<sup>n</sup> (n = jumlah pasangan heterozigot). Pasangan heterozigot: Aa, Bb, Cc (3 pasang). 2<sup>3</sup> = 8 gamet."
+            },
+            {
+                id: 48, topicId: 10, hots: true,
+                q: "Persilangan AaBb × AaBb menghasilkan 160 tanaman F2. Jumlah estimasi tanaman yang bergenotipe homozigot resesif (aabb) adalah...",
+                a: "10 tanaman", b: "30 tanaman", c: "90 tanaman", d: "40 tanaman", e: "100 tanaman",
+                key: "a",
+                exp: "Peluang aabb dari AaBb × AaBb = 1/16. Total tanaman = 1/16 × 160 = 10 tanaman."
+            },
+            {
+                id: 49, topicId: 10, hots: false,
+                q: "Bunyi Hukum Mendel II (Hukum Asortasi Bebas) berlaku secara penuh apabila...",
+                a: "Gen-gen terletak pada kromosom yang berbeda", b: "Gen mengalami tautan sempurna", c: "Terjadi gagal berpisah", d: "Alel bersifat kodominan", e: "Gen terletak pada kromosom seks",
+                key: "a",
+                exp: "Hukum Asortasi Bebas berlaku untuk gen-gen non-tertaut yang terletak pada pasang kromosom homolog berbeda."
+            },
+            {
+                id: 50, topicId: 10, hots: true,
+                q: "Persilangan AaBb × Aabb akan menghasilkan keturunan bergenotipe AaBb sebesar...",
+                a: "12.5%", b: "25%", c: "37.5%", d: "50%", e: "75%",
+                key: "b",
+                exp: "Peluang Aa dari Aa × Aa = 1/2. Peluang Bb dari Bb × bb = 1/2. Total peluang AaBb = 1/2 × 1/2 = 1/4 (25%)."
+            }
+        ];
+
+        // Glossary Terms Data
+        const GLOSSARY_DATA = [
+            { term: "Alel", def: "Bentuk variasi alternatif dari suatu gen yang mengendalikan sifat yang sama pada lokus setara." },
+            { term: "Alel Ganda", def: "Fenomena di mana sebuah gen memiliki lebih dari dua variasi alel pada lokus yang sama dalam populasi." },
+            { term: "Aneuploidi", def: "Kondisi perubahan jumlah kromosom akibat kelebihan atau kekurangan satu atau beberapa kromosom (contoh: trisomi, monosomi)." },
+            { term: "Atavisme", def: "Interaksi antara beberapa gen yang menghasilkan sifat atau fenotipe baru yang berbeda dari induknya." },
+            { term: "Dominan", def: "Sifat atau alel yang menutupi ekspresi alel pasangannya (resesif) dalam keadaan heterozigot." },
+            { term: "Epistasis", def: "Peristiwa di mana ekspresi satu gen menutupi atau menghalangi ekspresi gen lain yang bukan alelnya." },
+            { term: "Fenotipe", def: "Karakteristik fisik, fisiologis, atau tingkah laku organisme yang dapat diamati secara langsung." },
+            { term: "Gagal Berpisah (Nondisjunction)", def: "Kegagalan pasangan kromosom homolog atau kromatid saudara untuk berpisah secara normal saat pembelahan meiosis." },
+            { term: "Gamet", def: "Sel kelamin haploid (sperma atau ovum) yang membawa seperangkat alel untuk reproduksi." },
+            { term: "Gen", def: "Unit dasar pewarisan sifat berupa urutan DNA yang mengodekan protein atau fungsi spesifik." },
+            { term: "Gen Komplementer", def: "Interaksi dua gen dominan saling melengkapi yang diperlukan bersama-sama untuk memunculkan suatu fenotipe." },
+            { term: "Genotipe", def: "Susunan genetik atau kombinasi alel suatu individu (contoh: AA, Aa, aa)." },
+            { term: "Heterozigot", def: "Kondisi di mana individu memiliki dua alel berbeda untuk gen tertentu (contoh: Aa, Bb)." },
+            { term: "Hipostasis", def: "Gen yang ekspresinya ditutupi oleh gen lain (epistatik) yang bukan pasangannya." },
+            { term: "Homozigot", def: "Kondisi di mana individu memiliki dua alel identik untuk gen tertentu (contoh: AA atau aa)." },
+            { term: "Kodominan", def: "Kondisi di mana kedua alel dominan diekspresikan secara penuh dan bersamaan tanpa saling menutupi." },
+            { term: "Kriptomeri", def: "Gen dominan tersembunyi yang baru mengekspresikan sifat jika hadir bersama gen dominan lain." },
+            { term: "Monosomi", def: "Kehilangan satu kromosom dari pasangan homolognya (2n - 1)." },
+            { term: "Pindah Silang (Crossing Over)", def: "Pertukaran segmen kromatid bukan saudara antara kromosom homolog pada profase I meiosis." },
+            { term: "Polimeri", def: "Interaksi kumulatif dari beberapa gen berbeda yang memengaruhi satu sifat fenotipe yang sama." },
+            { term: "Punnett Square", def: "Diagram kisi berbentuk tabel yang digunakan untuk memprediksi rasio genotipe dan fenotipe hasil persilangan." },
+            { term: "Resesif", def: "Sifat atau alel yang tertutupi dan hanya diekspresikan jika dalam keadaan homozigot (contoh: aa)." },
+            { term: "Tautan Gen", def: "Kondisi gen-gen terletak pada kromosom homolog yang sama sehingga diwariskan bersama-sama." },
+            { term: "Trisomi", def: "Kelebihan satu kromosom pada pasangan homolognya (2n + 1)." }
+        ];
+
+        
+        // Initial setup on window load
+        window.onload = function () {
+            loadStorageData();
+            updateUIProgress();
+            loadTopic(1);
+            renderLatihanQuestion();
+            renderGlossary();
+            renderTeacherDashboard();
+        };
+
+        // Navigation Switch Tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('view-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-bio-50', 'text-bio-700', 'border-r-4', 'border-bio-600');
+            });
+            const activeNav = document.getElementById('nav-' + tabId);
+            if (activeNav) {
+                activeNav.classList.add('bg-bio-50', 'text-bio-700', 'border-r-4', 'border-bio-600');
+            }
+
+            // Close mobile drawer if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        function navClick(tabId) {
+            switchTab(tabId);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // LocalStorage Management
+        function loadStorageData() {
+            try {
+                const saved = localStorage.getItem('bio_genetika_xii_data');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState.studentName = parsed.studentName || 'Siswa SMA';
+                    appState.studentClass = parsed.studentClass || 'XII MIPA';
+                    appState.materiProgress = parsed.materiProgress || {};
+                    appState.latihanScores = parsed.latihanScores || 0;
+                    appState.examHistory = parsed.examHistory || [];
+                }
+            } catch (e) {
+                console.error("Storage error:", e);
+            }
+            updateStudentInfoUI();
+        }
+
+        function saveStorageData() {
+            try {
+                localStorage.setItem('bio_genetika_xii_data', JSON.stringify({
+                    studentName: appState.studentName,
+                    studentClass: appState.studentClass,
+                    materiProgress: appState.materiProgress,
+                    latihanScores: appState.latihanScores,
+                    examHistory: appState.examHistory
+                }));
+            } catch (e) {
+                console.error("Storage save error:", e);
+            }
+        }
+
+        function updateStudentInfoUI() {
+            document.getElementById('sidebar-student-name').innerText = appState.studentName;
+            document.getElementById('sidebar-student-class').innerText = appState.studentClass;
+            document.getElementById('exam-input-name').value = appState.studentName;
+            document.getElementById('exam-input-class').value = appState.studentClass;
+        }
+
+        function promptStudentInfo() {
+            const name = prompt("Masukkan Nama Lengkap Siswa:", appState.studentName);
+            if (name !== null && name.trim() !== "") {
+                appState.studentName = name.trim();
+                const cls = prompt("Masukkan Kelas / Jurusan:", appState.studentClass);
+                if (cls !== null && cls.trim() !== "") {
+                    appState.studentClass = cls.trim();
+                }
+                saveStorageData();
+                updateStudentInfoUI();
+                renderTeacherDashboard();
+            }
+        }
+
+        function updateUIProgress() {
+            const topicCount = Object.keys(appState.materiProgress).length;
+            const topicPercent = (topicCount / 10) * 50; // 50% max from materials
+            const examPercent = appState.examHistory.length > 0 ? 50 : 0; // 50% from completing exam
+            const totalPercent = Math.min(100, Math.round(topicPercent + examPercent));
+
+            document.getElementById('header-progress-bar').style.width = totalPercent + '%';
+            document.getElementById('header-progress-text').innerText = totalPercent + '%';
+            document.getElementById('beranda-progress-bar').style.width = totalPercent + '%';
+            document.getElementById('beranda-progress-percent').innerText = totalPercent + '%';
+
+            document.getElementById('stat-materi-count').innerText = `${topicCount}/10`;
+            document.getElementById('stat-latihan-score').innerText = appState.latihanScores;
+            document.getElementById('stat-ujian-count').innerText = appState.examHistory.length;
+
+            if (appState.examHistory.length > 0) {
+                const lastExam = appState.examHistory[appState.examHistory.length - 1];
+                document.getElementById('stat-last-grade').innerText = lastExam.score;
+            }
+        }
+
+        function loadTopic(id) {
+            id = parseInt(id);
+            appState.currentTopicId = id;
+            appState.materiProgress[id] = true;
+            saveStorageData();
+            updateUIProgress();
+
+            const topic = MATERI_DATA[id];
+            if (!topic) return;
+
+            document.getElementById('materi-select').value = id;
+            document.getElementById('topic-indicator').innerText = `Topik ${id} dari 10`;
+
+            const bodyHtml = `
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div>
+                            <span class="text-xs font-bold px-2.5 py-1 bg-bio-100 text-bio-800 rounded-full">${topic.badge}</span>
+                            <h3 class="text-xl font-bold text-slate-800 mt-2">${topic.title}</h3>
+                        </div>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-500 italic bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        📌 Summary: ${topic.summary}
+                    </p>
+                    <div class="pt-2 text-slate-700">
+                        ${topic.content}
+                    </div>
+                </div>
+            `;
+            document.getElementById('materi-body').innerHTML = bodyHtml;
+        }
+
+        function navTopic(direction) {
+            let next = appState.currentTopicId + direction;
+            if (next >= 1 && next <= 10) {
+                loadTopic(next);
+            }
+        }
+
+        
+        function setLabPreset(p1, p2) {
+            document.getElementById('lab-p1').value = p1;
+            document.getElementById('lab-p2').value = p2;
+            processLabCross();
+        }
+
+        function getGametes(genotype) {
+            genotype = genotype.trim();
+            // Handle Blood Types (IAi, IBi, IAIB, ii)
+            if (genotype.includes('I') || genotype.includes('i')) {
+                let g = [];
+                if (genotype.includes('IA')) g.push('I<sup>A</sup>');
+                if (genotype.includes('IB')) g.push('I<sup>B</sup>');
+                if (genotype.includes('i') && !genotype.includes('IA') && !genotype.includes('IB')) g.push('i');
+                else if (genotype.endsWith('i') || genotype.includes('Ai') || genotype.includes('Bi')) {
+                    if (!g.includes('i')) g.push('i');
+                }
+                if (genotype === 'ii') return ['i', 'i'];
+                return g.length ? g : [genotype];
+            }
+
+            // Monohybrid (2 chars, e.g. Aa, CC, cc)
+            if (genotype.length === 2) {
+                return [genotype[0], genotype[1]];
+            }
+
+            // Dihybrid (4 chars, e.g. AaBb, RrPp, BbEe)
+            if (genotype.length === 4) {
+                let g1 = [genotype[0], genotype[1]];
+                let g2 = [genotype[2], genotype[3]];
+                let gametes = [];
+                for (let a of g1) {
+                    for (let b of g2) {
+                        let combo = a + b;
+                        if (!gametes.includes(combo)) gametes.push(combo);
+                    }
+                }
+                return gametes;
+            }
+
+            return [genotype];
+        }
+
+        function processLabCross() {
+            const rawP1 = document.getElementById('lab-p1').value.trim();
+            const rawP2 = document.getElementById('lab-p2').value.trim();
+
+            if (!rawP1 || !rawP2) {
+                alert("Mohon isi genotipe Induk 1 dan Induk 2!");
+                return;
+            }
+
+            const g1 = getGametes(rawP1);
+            const g2 = getGametes(rawP2);
+
+            document.getElementById('lab-out-p1-str').innerText = rawP1;
+            document.getElementById('lab-out-p2-str').innerText = rawP2;
+
+            document.getElementById('lab-out-g1').innerHTML = g1.map(x => `<span class="px-2 py-1 bg-bio-200 text-bio-900 rounded border border-bio-300">${x}</span>`).join('');
+            document.getElementById('lab-out-g2').innerHTML = g2.map(x => `<span class="px-2 py-1 bg-dna-200 text-dna-900 rounded border border-dna-300">${x}</span>`).join('');
+
+            // Build Punnett Square Table
+            let tableHtml = `<thead><tr><th class="p-3 bg-slate-200 border text-xs font-bold">♀ \\ ♂</th>`;
+            g2.forEach(gam => {
+                tableHtml += `<th class="p-3 bg-dna-100 border text-xs font-bold text-dna-900 font-mono">${gam}</th>`;
+            });
+            tableHtml += `</tr></thead><tbody>`;
+
+            let genotypeCounts = {};
+            let totalOffspring = 0;
+
+            g1.forEach(gam1 => {
+                tableHtml += `<tr><td class="p-3 bg-bio-100 border text-xs font-bold text-bio-900 font-mono">${gam1}</td>`;
+                g2.forEach(gam2 => {
+                    let combined = combineGametes(gam1, gam2);
+                    genotypeCounts[combined] = (genotypeCounts[combined] || 0) + 1;
+                    totalOffspring++;
+                    tableHtml += `<td class="p-3 border text-center font-mono text-sm font-bold bg-white hover:bg-bio-50 punnett-cell">${combined}</td>`;
+                });
+                tableHtml += `</tr>`;
+            });
+            tableHtml += `</tbody>`;
+
+            document.getElementById('lab-punnett-table').innerHTML = tableHtml;
+
+            // Render Genotype Breakdown
+            let genoHtml = '';
+            for (let geno in genotypeCounts) {
+                let count = genotypeCounts[geno];
+                let percent = ((count / totalOffspring) * 100).toFixed(1);
+                genoHtml += `
+                    <div class="flex justify-between items-center p-2 bg-slate-50 border rounded-lg">
+                        <span class="font-bold text-bio-800">${geno}</span>
+                        <span class="text-slate-600">${count}/${totalOffspring} (${percent}%)</span>
+                    </div>
+                `;
+            }
+            document.getElementById('lab-genotype-list').innerHTML = genoHtml;
+
+            // Estimate Phenotypes
+            let phenoHtml = generatePhenotypeBreakdown(genotypeCounts, totalOffspring);
+            document.getElementById('lab-phenotype-list').innerHTML = phenoHtml;
+
+            document.getElementById('lab-result-container').classList.remove('hidden');
+        }
+
+        function combineGametes(g1, g2) {
+            let combined = g1 + g2;
+            combined = combined.replace(/<\/?[^>]+(>|$)/g, ""); // Strip HTML tags if any
+
+            // Order alleles alphabetically or capital first
+            if (combined.length === 2) {
+                let chars = combined.split('').sort();
+                if (chars[0].toLowerCase() === chars[1].toLowerCase()) {
+                    // Put uppercase first
+                    return chars[0] === chars[0].toUpperCase() ? chars.join('') : chars.reverse().join('');
+                }
+                return chars.join('');
+            }
+            if (combined.length === 4) {
+                let pair1 = [combined[0], combined[2]].sort();
+                if (pair1[0].toLowerCase() === pair1[1].toLowerCase() && pair1[1] === pair1[1].toUpperCase()) pair1.reverse();
+                let pair2 = [combined[1], combined[3]].sort();
+                if (pair2[0].toLowerCase() === pair2[1].toLowerCase() && pair2[1] === pair2[1].toUpperCase()) pair2.reverse();
+                return pair1.join('') + pair2.join('');
+            }
+            return combined;
+        }
+
+        function generatePhenotypeBreakdown(genotypeCounts, total) {
+            let phenoMap = {};
+
+            for (let geno in genotypeCounts) {
+                let count = genotypeCounts[geno];
+                let desc = getPhenotypeDescription(geno);
+                phenoMap[desc] = (phenoMap[desc] || 0) + count;
+            }
+
+            let html = '';
+            for (let pheno in phenoMap) {
+                let c = phenoMap[pheno];
+                let pct = ((c / total) * 100).toFixed(1);
+                html += `
+                    <div class="flex justify-between items-center p-2 bg-bio-50/60 border border-bio-100 rounded-lg text-xs font-semibold">
+                        <span class="text-slate-800">${pheno}</span>
+                        <span class="text-bio-700 font-bold">${c}/${total} (${pct}%)</span>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        function getPhenotypeDescription(geno) {
+            // Blood types
+            if (geno.includes('I') || geno.includes('i')) {
+                if (geno.includes('IA') && geno.includes('IB')) return "Golongan Darah AB";
+                if (geno.includes('IA')) return "Golongan Darah A";
+                if (geno.includes('IB')) return "Golongan Darah B";
+                if (geno === 'ii') return "Golongan Darah O";
+            }
+            // Atavism (RrPp)
+            if (geno.includes('R') && geno.includes('P')) {
+                let hasR = geno.includes('R');
+                let hasP = geno.includes('P');
+                if (hasR && hasP) return "Jengger Walnut (R_P_)";
+                if (hasR && !hasP) return "Jengger Rose (R_pp)";
+                if (!hasR && hasP) return "Jengger Pea (rrP_)";
+                return "Jengger Single (rrpp)";
+            }
+            // Standard Dihybrid (AaBb)
+            if (geno.length === 4) {
+                let dom1 = geno[0] === geno[0].toUpperCase();
+                let dom2 = geno[2] === geno[2].toUpperCase();
+                if (dom1 && dom2) return "Dominan Sifat 1 & Sifat 2 (A_B_)";
+                if (dom1 && !dom2) return "Dominan Sifat 1 & Resesif Sifat 2 (A_bb)";
+                if (!dom1 && dom2) return "Resesif Sifat 1 & Dominan Sifat 2 (aaB_)";
+                return "Resesif Sifat 1 & Sifat 2 (aabb)";
+            }
+            // Monohybrid
+            if (geno.length === 2) {
+                if (geno[0] === geno[0].toUpperCase()) return "Fenotipe Dominan (" + geno[0] + "_)";
+                return "Fenotipe Resesif (" + geno + ")";
+            }
+
+            return "Sifat Variasi " + geno;
+        }
+
+        function filterLatihanTopic(topicVal) {
+            appState.currentLatihanTopicFilter = topicVal;
+            appState.currentLatihanIdx = 0;
+            renderLatihanQuestion();
+        }
+
+        function getFilteredQuestions() {
+            if (appState.currentLatihanTopicFilter === 'all') {
+                return QUESTION_BANK;
+            }
+            const tid = parseInt(appState.currentLatihanTopicFilter);
+            return QUESTION_BANK.filter(q => q.topicId === tid);
+        }
+
+        function renderLatihanQuestion() {
+            const list = getFilteredQuestions();
+            if (list.length === 0) {
+                document.getElementById('latihan-question-card').innerHTML = '<p class="text-center text-slate-500 py-8">Tidak ada soal untuk topik ini.</p>';
+                return;
+            }
+
+            if (appState.currentLatihanIdx >= list.length) appState.currentLatihanIdx = list.length - 1;
+            if (appState.currentLatihanIdx < 0) appState.currentLatihanIdx = 0;
+
+            const q = list[appState.currentLatihanIdx];
+            document.getElementById('latihan-counter').innerText = `Soal ${appState.currentLatihanIdx + 1} dari ${list.length}`;
+
+            const hotsBadge = q.hots ? `<span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px] uppercase">Soal HOTS</span>` : '';
+
+            let optionsHtml = '';
+            ['a', 'b', 'c', 'd', 'e'].forEach(opt => {
+                optionsHtml += `
+                    <button onclick="checkLatihanAnswer('${opt}', '${q.key}', ${q.id})" id="latihan-opt-${opt}" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-bio-500 hover:bg-bio-50/50 transition text-xs sm:text-sm font-semibold text-slate-700 flex items-start gap-2">
+                        <span class="uppercase font-bold text-bio-700 font-mono">${opt}.</span>
+                        <span>${q[opt]}</span>
+                    </button>
+                `;
+            });
+
+            document.getElementById('latihan-question-card').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400">Topik ${q.topicId}</span>
+                        ${hotsBadge}
+                    </div>
+                    <p class="text-sm sm:text-base font-bold text-slate-800 leading-relaxed">${q.q}</p>
+                    <div class="space-y-2 pt-2">
+                        ${optionsHtml}
+                    </div>
+                    <div id="latihan-feedback" class="hidden p-4 rounded-xl text-xs space-y-2"></div>
+                </div>
+            `;
+        }
+
+        function checkLatihanAnswer(selectedOpt, correctKey, questionId) {
+            const fb = document.getElementById('latihan-feedback');
+            fb.classList.remove('hidden', 'bg-bio-50', 'border-bio-200', 'bg-red-50', 'border-red-200');
+
+            const q = QUESTION_BANK.find(x => x.id === questionId);
+
+            if (selectedOpt === correctKey) {
+                fb.classList.add('bg-bio-50', 'border', 'border-bio-200', 'text-bio-900');
+                fb.innerHTML = `
+                    <div class="font-bold text-bio-700 flex items-center gap-1">
+                        <span>✅</span> Jawaban kamu BENAR! (${selectedOpt.toUpperCase()})
+                    </div>
+                    <div class="text-slate-600 border-t border-bio-200/60 pt-2 mt-1">
+                        <strong>Pembahasan:</strong> ${q.exp}
+                    </div>
+                `;
+                appState.latihanScores += 10;
+                saveStorageData();
+                updateUIProgress();
+            } else {
+                fb.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-900');
+                fb.innerHTML = `
+                    <div class="font-bold text-red-700 flex items-center gap-1">
+                        <span>❌</span> Jawaban kamu kurang tepat. Kunci: ${correctKey.toUpperCase()}
+                    </div>
+                    <div class="text-slate-600 border-t border-red-200/60 pt-2 mt-1">
+                        <strong>Pembahasan:</strong> ${q.exp}
+                    </div>
+                `;
+            }
+        }
+
+        function navLatihan(dir) {
+            appState.currentLatihanIdx += dir;
+            renderLatihanQuestion();
+        }
+
+        
+        function startExam() {
+            const nameInput = document.getElementById('exam-input-name').value.trim();
+            const classInput = document.getElementById('exam-input-class').value.trim();
+
+            if (nameInput) appState.studentName = nameInput;
+            if (classInput) appState.studentClass = classInput;
+            saveStorageData();
+            updateStudentInfoUI();
+
+            const isHots = document.getElementById('exam-hots-mode').checked;
+
+            // Pick 40 questions randomly
+            let pool = [...QUESTION_BANK];
+            if (isHots) {
+                pool.sort((a, b) => (b.hots === a.hots ? 0 : b.hots ? 1 : -1));
+            } else {
+                pool.sort(() => Math.random() - 0.5);
+            }
+
+            appState.examQuestions = pool.slice(0, 40);
+            appState.examUserAnswers = {};
+            appState.examCurrentIdx = 0;
+            appState.examTimeRemaining = 3600; // 60 minutes
+
+            document.getElementById('ujian-start-screen').classList.add('hidden');
+            document.getElementById('ujian-active-screen').classList.remove('hidden');
+
+            startExamTimer();
+            renderExamQuestion();
+        }
+
+        function startExamTimer() {
+            clearInterval(appState.examTimerInterval);
+            appState.examTimerInterval = setInterval(() => {
+                appState.examTimeRemaining--;
+                let m = Math.floor(appState.examTimeRemaining / 60);
+                let s = appState.examTimeRemaining % 60;
+                document.getElementById('exam-timer').innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+
+                if (appState.examTimeRemaining <= 0) {
+                    clearInterval(appState.examTimerInterval);
+                    alert("Waktu ujian telah habis!");
+                    finishExam();
+                }
+            }, 1000);
+        }
+
+        function renderExamQuestion() {
+            const q = appState.examQuestions[appState.examCurrentIdx];
+            document.getElementById('exam-current-indicator').innerText = `Soal ${appState.examCurrentIdx + 1} dari 40`;
+
+            const answeredCount = Object.keys(appState.examUserAnswers).length;
+            document.getElementById('exam-answered-count').innerText = answeredCount;
+
+            const selectedAns = appState.examUserAnswers[q.id];
+
+            let optionsHtml = '';
+            ['a', 'b', 'c', 'd', 'e'].forEach(opt => {
+                const isSelected = selectedAns === opt;
+                const activeStyle = isSelected ? 'bg-purple-100 border-purple-600 text-purple-900 font-bold' : 'bg-white border-slate-200 hover:border-purple-400';
+                optionsHtml += `
+                    <button onclick="selectExamAnswer(${q.id}, '${opt}')" class="w-full text-left p-3.5 rounded-xl border ${activeStyle} transition text-xs sm:text-sm flex items-start gap-3">
+                        <span class="w-6 h-6 rounded-full ${isSelected ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600'} flex items-center justify-center font-bold text-xs uppercase font-mono">${opt}</span>
+                        <span class="pt-0.5">${q[opt]}</span>
+                    </button>
+                `;
+            });
+
+            document.getElementById('exam-question-body').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400">Topik ${q.topicId}</span>
+                        ${q.hots ? '<span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-bold rounded text-[10px]">HOTS</span>' : ''}
+                    </div>
+                    <p class="text-sm sm:text-base font-bold text-slate-800 leading-relaxed">${q.q}</p>
+                    <div class="space-y-2 pt-2">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectExamAnswer(qId, opt) {
+            appState.examUserAnswers[qId] = opt;
+            renderExamQuestion();
+        }
+
+        function navExam(dir) {
+            appState.examCurrentIdx += dir;
+            if (appState.examCurrentIdx < 0) appState.examCurrentIdx = 0;
+            if (appState.examCurrentIdx >= appState.examQuestions.length) appState.examCurrentIdx = appState.examQuestions.length - 1;
+            renderExamQuestion();
+        }
+
+        function showExamGridModal() {
+            let btnsHtml = '';
+            appState.examQuestions.forEach((q, idx) => {
+                const isAnswered = appState.examUserAnswers[q.id] !== undefined;
+                const isCurrent = idx === appState.examCurrentIdx;
+                let bg = isAnswered ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200';
+                if (isCurrent) bg += ' ring-2 ring-purple-900 font-extrabold';
+                btnsHtml += `
+                    <button onclick="jumpToExamQuestion(${idx})" class="w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center ${bg}">
+                        ${idx + 1}
+                    </button>
+                `;
+            });
+            document.getElementById('exam-grid-buttons').innerHTML = btnsHtml;
+            document.getElementById('exam-grid-modal').classList.remove('hidden');
+        }
+
+        function hideExamGridModal() {
+            document.getElementById('exam-grid-modal').classList.add('hidden');
+        }
+
+        function jumpToExamQuestion(idx) {
+            appState.examCurrentIdx = idx;
+            renderExamQuestion();
+            hideExamGridModal();
+        }
+
+        function confirmFinishExam() {
+            if (confirm("Apakah Anda yakin ingin mengakhiri simulasi ujian sekarang?")) {
+                finishExam();
+            }
+        }
+
+        function finishExam() {
+            clearInterval(appState.examTimerInterval);
+
+            let correct = 0;
+            let wrong = 0;
+            let unans = 0;
+
+            let topicBreakdown = {};
+
+            appState.examQuestions.forEach(q => {
+                const userAns = appState.examUserAnswers[q.id];
+                if (!topicBreakdown[q.topicId]) {
+                    topicBreakdown[q.topicId] = { correct: 0, total: 0 };
+                }
+                topicBreakdown[q.topicId].total++;
+
+                if (!userAns) {
+                    unans++;
+                } else if (userAns === q.key) {
+                    correct++;
+                    topicBreakdown[q.topicId].correct++;
+                } else {
+                    wrong++;
+                }
+            });
+
+            const score = Math.round((correct / appState.examQuestions.length) * 100);
+
+            let category = "Perlu Belajar Lagi";
+            if (score >= 90) category = "Sangat Baik";
+            else if (score >= 80) category = "Baik";
+            else if (score >= 70) category = "Cukup";
+
+            const examResult = {
+                date: new Date().toLocaleDateString('id-ID'),
+                studentName: appState.studentName,
+                studentClass: appState.studentClass,
+                score: score,
+                correct: correct,
+                wrong: wrong,
+                unans: unans,
+                category: category,
+                topicBreakdown: topicBreakdown
+            };
+
+            appState.examHistory.push(examResult);
+            saveStorageData();
+            updateUIProgress();
+
+            renderHasilEvaluation(examResult);
+            switchTab('hasil');
+        }
+
+        function renderHasilEvaluation(res) {
+            document.getElementById('hasil-date-str').innerText = `Tanggal: ${res.date}`;
+            document.getElementById('hasil-student-name').innerText = res.studentName;
+            document.getElementById('hasil-student-class').innerText = `${res.studentClass} • SMAN 2 Tanjung Raja`;
+            document.getElementById('hasil-final-score').innerText = res.score;
+            document.getElementById('hasil-category-badge').innerText = res.category;
+
+            document.getElementById('hasil-correct-count').innerText = res.correct;
+            document.getElementById('hasil-wrong-count').innerText = res.wrong;
+            document.getElementById('hasil-empty-count').innerText = res.unans;
+
+            // Render Topic Diagnostics
+            let diagHtml = '';
+            for (let tid in res.topicBreakdown) {
+                const item = res.topicBreakdown[tid];
+                const topicObj = MATERI_DATA[tid];
+                const pct = Math.round((item.correct / item.total) * 100);
+
+                let badgeColor = pct >= 80 ? 'bg-bio-100 text-bio-800' : (pct >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                let advice = pct >= 80 ? 'Sangat menguasai konsep ini!' : 'Disarankan membaca ulang ringkasan materi topik ini.';
+
+                diagHtml += `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-xs text-slate-800">${topicObj ? topicObj.title : 'Topik ' + tid}</span>
+                            <span class="px-2 py-0.5 rounded text-xs font-bold ${badgeColor}">${item.correct}/${item.total} Benar</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-bio-600 h-2 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500"><strong>Saran:</strong> ${advice}</p>
+                    </div>
+                `;
+            }
+            document.getElementById('hasil-topic-analysis').innerHTML = diagHtml;
+        }
+
+        function renderTeacherDashboard() {
+            const hist = appState.examHistory;
+            document.getElementById('dash-total-exams').innerText = hist.length;
+
+            if (hist.length === 0) {
+                document.getElementById('dash-avg-score').innerText = 0;
+                document.getElementById('dash-max-score').innerText = 0;
+                document.getElementById('dash-min-score').innerText = 0;
+                document.getElementById('dash-history-table-body').innerHTML = '<tr><td colspan="6" class="text-center py-6 text-xs text-slate-400">Belum ada data pengerjaan ujian.</td></tr>';
+                return;
+            }
+
+            let totalScores = 0;
+            let maxS = 0;
+            let minS = 100;
+
+            let rowsHtml = '';
+            hist.slice().reverse().forEach(item => {
+                totalScores += item.score;
+                if (item.score > maxS) maxS = item.score;
+                if (item.score < minS) minS = item.score;
+
+                rowsHtml += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="px-4 py-3 text-xs">${item.date}</td>
+                        <td class="px-4 py-3 font-bold text-slate-800">${item.studentName}</td>
+                        <td class="px-4 py-3 text-xs text-slate-500">${item.studentClass}</td>
+                        <td class="px-4 py-3 text-center text-xs font-mono">${item.correct}/${item.correct + item.wrong + item.unans}</td>
+                        <td class="px-4 py-3 text-center font-extrabold text-bio-700">${item.score}</td>
+                        <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 bg-bio-100 text-bio-800 text-[10px] font-bold rounded-full">${item.category}</span></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('dash-avg-score').innerText = Math.round(totalScores / hist.length);
+            document.getElementById('dash-max-score').innerText = maxS;
+            document.getElementById('dash-min-score').innerText = minS;
+            document.getElementById('dash-history-table-body').innerHTML = rowsHtml;
+        }
+
+        function exportResultsCSV() {
+            const hist = appState.examHistory;
+            if (hist.length === 0) {
+                alert("Belum ada data riwayat ujian untuk diexport!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Tanggal,Nama Siswa,Kelas,Benar,Salah,Nilai,Kategori\n";
+            hist.forEach(h => {
+                csvContent += `"${h.date}","${h.studentName}","${h.studentClass}",${h.correct},${h.wrong},${h.score},"${h.category}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Hasil_Simulasi_Genetika_${appState.studentName.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function confirmResetData() {
+            if (confirm("Apakah Anda yakin ingin menghapus semua riwayat dan progres pembelajaran pada perangkat ini?")) {
+                localStorage.removeItem('bio_genetika_xii_data');
+                location.reload();
+            }
+        }
+
+        // Glossary Filtering
+        function renderGlossary(filterText = '') {
+            const container = document.getElementById('glossary-list');
+            let html = '';
+
+            GLOSSARY_DATA.forEach(item => {
+                if (!filterText || item.term.toLowerCase().includes(filterText.toLowerCase()) || item.def.toLowerCase().includes(filterText.toLowerCase())) {
+                    html += `
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-1 hover:border-bio-400 transition">
+                            <h4 class="font-bold text-bio-800 text-sm flex items-center gap-1.5">
+                                <span>💡</span> ${item.term}
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">${item.def}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            if (!html) {
+                html = '<div class="col-span-2 text-center text-slate-400 text-xs py-8">Istilah tidak ditemukan.</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function filterGlossary() {
+            const query = document.getElementById('glossary-search').value.trim();
+            renderGlossary(query);
+        }
+    </script>
+</body>
+</html>
